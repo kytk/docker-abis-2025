@@ -46,7 +46,7 @@ RUN apt-get install -y python3-pip python3-venv python3-dev python3-tk \
 
 RUN python3 -m pip install --upgrade pip
 RUN pip install numpy pandas pydicom gdcm dcm2bids heudiconv \
-     nipype nibabel jupyter notebook bash_kernel && \
+     nipype nibabel jupyter notebook bash_kernel octave_kernel && \
     python3 -m bash_kernel.install
 
 # Install utilities
@@ -202,14 +202,28 @@ RUN echo '\n\
 FSLDIR=/usr/local/fsl\n\
 PATH=${FSLDIR}/share/fsl/bin:${PATH}\n\
 export FSLDIR PATH\n\
-. ${FSLDIR}/etc/fslconf/fsl.sh' >> /etc/skel/.bash_aliases
+. ${FSLDIR}/etc/fslconf/fsl.sh' >> /etc/skel/.bash_aliases && \
+sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop
 
-# VS code
+# Octave
+RUN apt-get install -y octave
+
+# AlizaMS
 RUN cd /tmp && \
-curl https://packages.microsoft.com/keys/microsoft.asc -o vscode.asc && \
-gpg --output /usr/share/keyrings/vscode.gpg --dearmor vscode.asc && \
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/vscode.gpg] https://packages.microsoft.com/repos/vscode stable main" | tee /etc/apt/sources.list.d/vscode.list && \
-apt-get update && apt-get install -y code
+curl -O -C - http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
+apt install -y ./alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
+sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop
+
+# dcm2niix
+RUN cd /tmp && \
+wget https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20240202/dcm2niix_lnx.zip && \
+mkdir /usr/local/dcm2niix && \
+unzip dcm2niix_lnx.zip -d /usr/local/dcm2niix && \
+echo '' >> /etc/skel/.bash_aliases && \
+echo '# dcm2niix' >> /etc/skel/.bash_aliases && \
+echo 'export PATH=/usr/local/dcm2niix:$PATH' >> /etc/skel/.bash_aliases
+
+
 
 ##### End of Neuroimaging and Related Software packages #####
 
