@@ -72,7 +72,6 @@ RUN apt-get install -y \
     system-config-printer \
     tree \
     unzip \
-    update-manager \
     vim  \
     zip \
     tcsh \
@@ -271,12 +270,11 @@ RUN cd /usr/local && \
 wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/spm12_standalone_jammy_R2022b.zip && \
 unzip spm12_standalone_jammy_R2022b.zip && \
 rm spm12_standalone_jammy_R2022b.zip && \
-chown -R brain:brain spm12_standalone && \
 cd spm12_standalone && \
 chmod 755 run_spm12.sh spm12 && \
-echo '\n\
-#SPM12 standalone\n\
-"alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2022b'"' >> /etc/skel/.bash_aliases
+echo '' >> /etc/skel/.bash_aliases && \
+echo '#SPM12 standalone' >> /etc/skel/.bash_aliases && \
+echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2022b/'" >> /etc/skel/.bash_aliases
 
 
 
@@ -295,6 +293,11 @@ RUN mkdir -p /root/.vnc && \
 RUN useradd -m -s /bin/bash brain && \
     echo "brain:lin4neuro" | chpasswd && \
     adduser brain sudo
+
+# SPM settings
+RUN chown -R brain:brain /usr/local/spm12_standalone && \
+cd /usr/local/spm12_standalone && \
+chmod 755 run_spm12.sh spm12
 
 # Set up VNC for the new user
 RUN mkdir -p /home/brain/.vnc && \
