@@ -124,7 +124,7 @@ RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
 
 # Background image and remove an unnecessary image file
 RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
-    rm /usr/share/backgrounds/xfce/xfce-*.png && \
+    rm /usr/share/backgrounds/xfce/xfce-*.*p*g && \
     ln -s /usr/share/backgrounds/deep_ocean.png /usr/share/backgrounds/xfce/xfce-stripes.png
 
 # Customized panel, desktop, and theme
@@ -194,10 +194,8 @@ RUN cd /usr/local && wget http://www.lin4neuro.net/lin4neuro/neuroimaging_softwa
 # FSL
 RUN cd /tmp && \
     wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
-    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl
-
-# FSL profile setting
-RUN echo '\n\
+    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
+echo '\n\
 # FSL Setup\n\
 FSLDIR=/usr/local/fsl\n\
 PATH=${FSLDIR}/share/fsl/bin:${PATH}\n\
@@ -212,16 +210,44 @@ RUN apt-get install -y octave
 RUN cd /tmp && \
 curl -O -C - http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
 apt install -y ./alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
+rm alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
 sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop
 
 # dcm2niix
-RUN cd /tmp && \
-wget https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20240202/dcm2niix_lnx.zip && \
+RUN cd /usr/local && \
 mkdir /usr/local/dcm2niix && \
-unzip dcm2niix_lnx.zip -d /usr/local/dcm2niix && \
+wget https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20240202/dcm2niix_lnx.zip && \
+unzip dcm2niix_lnx.zip -d /usr/local/dcm2niix && rm dcm2niix_lnx.zip && \
 echo '' >> /etc/skel/.bash_aliases && \
 echo '# dcm2niix' >> /etc/skel/.bash_aliases && \
 echo 'export PATH=/usr/local/dcm2niix:$PATH' >> /etc/skel/.bash_aliases
+
+# MRtrix3
+RUN apt-get install -y \
+    g++ \
+    libeigen3-dev \
+    zlib1g-dev \
+    libqt5opengl5-dev \
+    libqt5svg5-dev \
+    libgl1-mesa-dev \
+    libfftw3-dev \
+    libtiff5-dev \
+    libpng-dev && \
+cd /usr/local && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/mrtrix3_jammy.zip && \
+unzip mrtrix3_jammy.zip && \
+echo '\n\
+# MRtrix3\n\
+export PATH=$PATH:/usr/local/mrtrix3/bin' >> /etc/skel/.bash_aliases
+
+# ANTs
+RUN cd /usr/local && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/ANTs-jammy.zip && \
+unzip ANTs-jammy.zip && \
+echo '\n\
+#ANTs\n\
+export ANTSPATH=/usr/local/ANTs/bin\n\
+export PATH=$PATH:$ANTSPATH' >> /etc/skel/.bash_aliases
 
 
 
