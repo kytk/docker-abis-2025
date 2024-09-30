@@ -249,6 +249,37 @@ echo '\n\
 export ANTSPATH=/usr/local/ANTs/bin\n\
 export PATH=$PATH:$ANTSPATH' >> /etc/skel/.bash_aliases
 
+# MCR
+RUN cd /tmp/ && \
+mkdir mcr_v913 && cd mcr_v913 && \
+wget https://ssd.mathworks.com/supportfiles/downloads/R2022b/Release/10/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2022b_Update_10_glnxa64.zip && \
+unzip MATLAB_Runtime_R2022b_Update_10_glnxa64.zip && \
+./install -mode silent -agreeToLicense yes \
+    -destinationFolder /usr/local/MATLAB/MCR/ && \
+cd /tmp && rm -rf mcr_v913
+
+# NODDI
+RUN cd /usr/local && \
+wget https://www.nemotos.net/l4n-abis/NODDI_linux.zip && \
+unzip NODDI_linux.zip && rm NODDI_linux.zip && \
+echo '\n\
+# NODDI\n\
+export PATH=$PATH:/usr/local/NODDI' >> /etc/skel/.bash_aliases
+
+# SPM12
+RUN cd /usr/local && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/spm12_standalone_jammy_R2022b.zip && \
+unzip spm12_standalone_jammy_R2022b.zip && \
+rm spm12_standalone_jammy_R2022b.zip && \
+chown -R brain:brain spm12_standalone && \
+cd spm12_standalone && \
+chmod 755 run_spm12.sh spm12 && \
+echo '\n\
+#SPM12 standalone\n\
+"alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2022b'"' >> /etc/skel/.bash_aliases
+
+
+
 
 
 ##### End of Neuroimaging and Related Software packages #####
