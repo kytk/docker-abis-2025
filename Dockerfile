@@ -299,8 +299,8 @@ echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/
 # CONN 22v2407
 RUN cd /usr/local && mkdir conn22v2407_standalone && \
 cd conn22v2407_standalone && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v2407_glnxa64.zip && \
-unzip conn22v2407_glnxa64.zip && rm conn22v2407_glnxa64.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v2407.zip && \
+unzip conn22v2407.zip && rm conn22v2407.zip && \
 echo '' >> /etc/skel/.bash_aliases && \
 echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
 echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2022b/'" >> /etc/skel/.bash_aliases
