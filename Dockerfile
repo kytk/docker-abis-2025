@@ -296,8 +296,14 @@ echo '' >> /etc/skel/.bash_aliases && \
 echo '#SPM12 standalone' >> /etc/skel/.bash_aliases && \
 echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2022b/'" >> /etc/skel/.bash_aliases
 
-
-
+# CONN 22v2407
+RUN cd /usr/local && mkdir conn22v2407_standalone && \
+cd conn22v2407_standalone && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v2407_glnxa64.zip && \
+unzip conn22v2407_glnxa64.zip && rm conn22v2407_glnxa64.zip && \
+echo '' >> /etc/skel/.bash_aliases && \
+echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
+echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2022b/'" >> /etc/skel/.bash_aliases
 
 
 ##### End of Neuroimaging and Related Software packages #####
@@ -318,6 +324,9 @@ RUN useradd -m -s /bin/bash brain && \
 RUN chown -R brain:brain /usr/local/spm12_standalone && \
 cd /usr/local/spm12_standalone && \
 chmod 755 run_spm12.sh spm12
+
+# CONN settings
+RUN chown -R brain:brain /usr/local/con22v2407_standalone
 
 # Set up VNC for the new user
 RUN mkdir -p /home/brain/.vnc && \
