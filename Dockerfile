@@ -131,6 +131,7 @@ RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
 # Background image and remove an unnecessary image file
 RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
     rm /usr/share/backgrounds/xfce/xfce-*.*p*g
+COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
 
 # Modified lightdm-gtk-greeter.conf
 RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
