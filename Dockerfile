@@ -138,7 +138,7 @@ RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
 
 # Auto-login
 RUN mkdir -p /usr/share/lightdm/lightdm.conf.d && \
-    cp "${base_path}"/lightdm/lightdm.conf.d/10-ubuntu.conf \
+    cp ${parts}/lightdm/lightdm.conf.d/10-ubuntu.conf \
  /usr/share/lightdm/lightdm.conf.d
 
 # Clean packages
