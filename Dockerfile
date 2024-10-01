@@ -326,7 +326,7 @@ cd /usr/local/spm12_standalone && \
 chmod 755 run_spm12.sh spm12
 
 # CONN settings
-RUN chown -R brain:brain /usr/local/con22v2407_standalone
+RUN chown -R brain:brain /usr/local/conn22v2407_standalone
 
 # Set up VNC for the new user
 RUN mkdir -p /home/brain/.vnc && \
