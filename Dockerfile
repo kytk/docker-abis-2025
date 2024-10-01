@@ -123,8 +123,7 @@ RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
 
 # Background image and remove an unnecessary image file
 RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
-    rm /usr/share/backgrounds/xfce/xfce-*.*p*g && \
-    ln -s /usr/share/backgrounds/deep_ocean.png /usr/share/backgrounds/xfce/xfce-stripes.png
+    rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 
 # Customized panel, desktop, and theme
 RUN cp -r ${parts}/config/xfce4 /etc/skel/.config
