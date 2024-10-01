@@ -116,6 +116,13 @@ RUN mkdir -p /etc/skel/.local/share && \
 RUN mkdir -p /etc/skel/.config/menus && \
     cp ${parts}/config/menus/xfce-applications.menu /etc/skel/.config/menus
 
+# Customized panel, desktop, and theme
+RUN cp -r ${parts}/config/xfce4 /etc/skel/.config/
+
+# Desktop files
+RUN cp -r ${parts}/local/share/applications /etc/skel/.local/share/
+
+
 # Neuroimaging.directory
 RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
     cp ${parts}/local/share/desktop-directories/Neuroimaging.directory \
@@ -125,10 +132,23 @@ RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
 RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
     rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 
-# Customized panel, desktop, and theme
-RUN cp -r ${parts}/config/xfce4 /etc/skel/.config
+# Modified lightdm-gtk-greeter.conf
+RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
+    cp ${parts}/lightdm/lightdm-gtk-greeter.conf.d/01_ubuntu.conf /usr/share/lightdm/lightdm-gtk-greeter.conf.d
 
+# Auto-login
+RUN mkdir -p /usr/share/lightdm/lightdm.conf.d && \
+    cp "${base_path}"/lightdm/lightdm.conf.d/10-ubuntu.conf \
+ /usr/share/lightdm/lightdm.conf.d
+
+# Clean packages
+RUN apt-get -y autoremove
+
+# alias
 RUN echo "alias open='xdg-open &> /dev/null'" >> /etc/skel/.bash_aliases
+
+# Deactivate screensaver
+RUN echo 'xset s off' >> /etc/skel/.xsession
 
 ##### Lin4Neuro settings end #####
 
