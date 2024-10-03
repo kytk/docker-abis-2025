@@ -304,10 +304,51 @@ echo '' >> /etc/skel/.bash_aliases && \
 echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
 echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2022b/'" >> /etc/skel/.bash_aliases
 
+# FreeSurfer 7.4.1
+# Install dependencies
+RUN cd /usr/local && \
+mkdir freesurfer && cd freesurfer && \
+apt install -y binutils libx11-dev gettext x11-apps \
+  perl make csh tcsh bash file bc gzip tar \
+  xorg xorg-dev xserver-xorg-video-intel libncurses5 libbsd0 libc6 libc6 \
+  libcom-err2 libcrypt1 libdrm2 libegl1 libexpat1 libffi7 libfontconfig1 \
+  libfreetype6 libgcc-s1 libgl1 libglib2.0-0 libglu1-mesa libglvnd0 libglx0 \
+  libgomp1 libgssapi-krb5-2 libice6 libjpeg62 libk5crypto3 libkeyutils1 \
+  libkrb5-3 libkrb5support0 libpcre3 libpng16-16 libquadmath0 libsm6 \
+  libstdc++6 libuuid1 libwayland-client0 libwayland-cursor0 libx11-6 \
+  libx11-xcb1 libxau6 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+  libxcb-randr0 libxcb-render-util0 libxcb-render0 libxcb-shape0 \
+  libxcb-shm0 libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xinerama0 \
+  libxcb-xinput0 libxcb-xkb1 libxcb1 libxdmcp6 libxext6 libxft2 libxi6 \
+  libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
+  zlib1g && \
+wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+tar -xvf freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+rm freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+mv freesurfer 7.4.1 && \
+echo '\n\
+#FreeSurfer 7.4.1\n\
+export SUBJECTS_DIR=~/freesurfer/7.4.1/subjects\n\
+export FREESURFER_HOME=/usr/local/freesurfer/7.4.1\n\
+export FS_LICENSE=~/share/license.txt\n\
+source $FREESURFER_HOME/SetUpFreeSurfer.sh' >> /etc/skel/.bash_aliases
+
+# fs-scripts
+RUN cd /etc/skel/git && \
+git clone https://gitlab.com/kytk/fs-scripts.git && \
+echo '\n\
+# fs-scripts \n\
+export PATH=$PATH:~/git/fs-scripts' >> /etc/skel/.bash_aliases
+
+# kn-scripts
+RUN cd /etc/skel/git && \
+git clone https://gitlab.com/kytk/kn-scripts.git && \
+echo '\n\
+# kn-scripts \n\
+export PATH=$PATH:~/git/kn-scripts' >> /etc/skel/.bash_aliases
+
 
 ##### End of Neuroimaging and Related Software packages #####
-
-
 
 # Set up VNC
 RUN mkdir -p /root/.vnc && \
@@ -337,6 +378,7 @@ RUN mkdir -p /home/brain/.vnc && \
 RUN mkdir -p /home/brain/logs && \
     chown -R brain:brain /home/brain/logs
 
+
 # Copy supervisord configuration
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
@@ -352,6 +394,10 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 # Switch to the new user
 USER brain
 ENV USER=brain
+
+RUN mkdir -p ~/freesurfer/7.4.1 && \
+cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
+
 
 #CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
