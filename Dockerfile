@@ -1,6 +1,6 @@
-## Dockerfile to make "docker-l4n-jammy"
-## This file makes a container image of docker-lin4neuro
-## K. Nemoto 29 Sep 2024
+## Dockerfile to make "docker-abis-2025"
+## This file makes a container image of docker-abis-2025
+## K. Nemoto 03 Oct 2024
 
 FROM ubuntu:22.04
 
@@ -336,7 +336,6 @@ RUN mkdir -p /home/brain/.vnc && \
 # Create a directory for supervisor logs
 RUN mkdir -p /home/brain/logs && \
     chown -R brain:brain /home/brain/logs
-
 
 # Copy supervisord configuration
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
