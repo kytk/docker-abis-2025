@@ -2,7 +2,7 @@
 ## This file makes a container image of docker-abis-2025
 ## K. Nemoto 06 Oct 2024
 
-FROM --platform=linux/amd64 ubuntu:22.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
