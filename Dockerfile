@@ -214,9 +214,13 @@ RUN cd /usr/local && wget http://www.lin4neuro.net/lin4neuro/neuroimaging_softwa
     echo 'export PATH=$PATH:/usr/local/Surf_Ice' >> /etc/skel/.bash_aliases
 
 # FSL
-RUN cd /tmp && \
-    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
-    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
+# RUN cd /tmp && \
+#    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
+#    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
+RUN cd /usr/local/ && \
+    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/fsl-6.0.7.13-jammy.tar.gz && \
+    tar -xvf fsl-6.0.7.13-jammy.tar.gz && \
+    rm fsl-6.0.7.13-jammy.tar.gz && \ 
 echo '\n\
 # FSL Setup\n\
 FSLDIR=/usr/local/fsl\n\
