@@ -330,7 +330,8 @@ apt install -y binutils libx11-dev gettext x11-apps \
   libxcb-xinput0 libxcb-xkb1 libxcb1 libxdmcp6 libxext6 libxft2 libxi6 \
   libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
   zlib1g && \
-wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+#wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
 tar -xvf freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
 rm freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
 mv freesurfer 7.4.1 && \
