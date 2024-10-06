@@ -101,6 +101,7 @@ RUN apt-get install -y \
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN apt install -y ./google-chrome-stable_current_amd64.deb
 RUN rm google-chrome-stable_current_amd64.deb
+COPY google-chrome.dektop /etc/skel/.loca/share/applications
 
 ##### Lin4Neuro #####
 RUN mkdir /etc/skel/git && cd /etc/skel/git && \
@@ -129,9 +130,11 @@ RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
        /etc/skel/.local/share/desktop-directories
 
 # Background image and remove an unnecessary image file
+# Disable lock screen
 RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
     rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
+COPY xfce4-session.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
 
 # Modified lightdm-gtk-greeter.conf
 RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
