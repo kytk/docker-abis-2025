@@ -12,21 +12,21 @@ RUN apt-get update && apt-get upgrade -y && \
     xfce4 \
     xfce4-terminal \
     xfce4-indicator-plugin  \
-    xfce4-clipman \
-    xfce4-clipman-plugin \
+#    xfce4-clipman \
+#    xfce4-clipman-plugin \
     xfce4-statusnotifier-plugin  \
-    xfce4-power-manager-plugins \
+#    xfce4-power-manager-plugins \
     xfce4-screenshooter \
     lightdm \
     lightdm-gtk-greeter \
     lightdm-gtk-greeter-settings \
     shimmer-themes \
-    network-manager-gnome \
+#    network-manager-gnome \
     xinit \
     build-essential  \
     dkms \
     thunar-archive-plugin \
-    file-roller \
+#    file-roller \
     gawk \
     xdg-utils \
     tightvncserver \
@@ -55,34 +55,34 @@ RUN apt-get install -y \
     apt-utils \
     at-spi2-core \
     bc \
-    byobu \
+#    byobu \
     curl \
     wget \
     dc \
     default-jre \
     evince \
-    exfatprogs \
+#    exfatprogs \
     gedit \
     gnome-system-monitor \
     gnome-system-tools \
-    gparted \
+#    gparted \
     imagemagick \
     rename \
     ntp \
-    system-config-printer \
+#    system-config-printer \
     tree \
     unzip \
     vim  \
     zip \
     tcsh \
     baobab \
-    bleachbit \
+#    bleachbit \
     libopenblas-base \
     cups \
     apturl \
     dmz-cursor-theme \
-    chntpw \
-    gddrescue \
+#    chntpw \
+#    gddrescue \
     p7zip-full \
     gnupg \
     eog \
@@ -90,12 +90,13 @@ RUN apt-get install -y \
     libjpeg62 \
     software-properties-common \
     fonts-noto \
-    mupdf \
-    mupdf-tools \
+#    mupdf \
+#    mupdf-tools \
     pigz \
-    ristretto \
-    pinta \
-    libreoffice
+#    ristretto \
+#    pinta \
+#    libreoffice
+    gnumeric
  
 # Install Google-chrome
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -164,10 +165,10 @@ RUN cp -r ${parts}/tdaemon /usr/local && \
     echo '#tdaemon' >> /etc/skel/.bash_aliases && \
     echo "alias tdaemon='java -jar /usr/local/tdaemon/talairach.jar'" >> /etc/skel/.bash_aliases
 
-# VirtualMRI
-RUN cd /usr/local && \
-    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/vmri.zip && \
-    unzip vmri.zip && rm vmri.zip
+## VirtualMRI
+#RUN cd /usr/local && \
+#    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/vmri.zip && \
+#    unzip vmri.zip && rm vmri.zip
 
 # Mango
 RUN cd /usr/local && \
@@ -242,16 +243,17 @@ echo '# dcm2niix' >> /etc/skel/.bash_aliases && \
 echo 'export PATH=/usr/local/dcm2niix:$PATH' >> /etc/skel/.bash_aliases
 
 # MRtrix3
-RUN apt-get install -y \
-    g++ \
-    libeigen3-dev \
-    zlib1g-dev \
-    libqt5opengl5-dev \
-    libqt5svg5-dev \
-    libgl1-mesa-dev \
-    libfftw3-dev \
-    libtiff5-dev \
-    libpng-dev && \
+RUN \
+# apt-get install -y \
+#    g++ \
+#    libeigen3-dev \
+#    zlib1g-dev \
+#    libqt5opengl5-dev \
+#    libqt5svg5-dev \
+#    libgl1-mesa-dev \
+#    libfftw3-dev \
+#    libtiff5-dev \
+#    libpng-dev && \
 cd /usr/local && \
 wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/mrtrix3_jammy.zip && \
 unzip mrtrix3_jammy.zip && \
