@@ -33,7 +33,6 @@ RUN apt-get update && apt-get upgrade -y && \
     novnc \
     websockify \
     net-tools \
-    curl \
     supervisor \
     x11vnc \
     xvfb \
@@ -228,7 +227,7 @@ RUN apt-get install -y octave
 
 # AlizaMS
 RUN cd /tmp && \
-curl -O -C - http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
 apt install -y ./alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
 rm alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
 sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop
