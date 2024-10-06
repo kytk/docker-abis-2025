@@ -101,7 +101,7 @@ RUN apt-get install -y \
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN apt install -y ./google-chrome-stable_current_amd64.deb
 RUN rm google-chrome-stable_current_amd64.deb
-COPY google-chrome.dektop /etc/skel/.loca/share/applications
+COPY google-chrome.desktop /etc/skel/.loca/share/applications
 
 ##### Lin4Neuro #####
 RUN mkdir /etc/skel/git && cd /etc/skel/git && \
