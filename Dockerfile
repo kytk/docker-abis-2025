@@ -101,7 +101,6 @@ RUN apt-get install -y \
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN apt install -y ./google-chrome-stable_current_amd64.deb
 RUN rm google-chrome-stable_current_amd64.deb
-COPY google-chrome.desktop /etc/skel/.local/share/applications
 
 ##### Lin4Neuro #####
 RUN mkdir /etc/skel/git && cd /etc/skel/git && \
@@ -112,6 +111,7 @@ ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts
 RUN mkdir -p /etc/skel/.local/share && \ 
     cp -r ${parts}/local/share/icons /etc/skel/.local/share/ && \
     cp -r ${parts}/local/share/applications /etc/skel/.local/share/
+COPY google-chrome.desktop /etc/skel/.local/share/applications
 
 # Customized menu
 RUN mkdir -p /etc/skel/.config/menus && \
