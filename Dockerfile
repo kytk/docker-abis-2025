@@ -17,9 +17,9 @@ RUN apt-get update && apt-get upgrade -y && \
     xfce4-statusnotifier-plugin  \
 #    xfce4-power-manager-plugins \
     xfce4-screenshooter \
-    lightdm \
-    lightdm-gtk-greeter \
-    lightdm-gtk-greeter-settings \
+#    lightdm \
+#    lightdm-gtk-greeter \
+#    lightdm-gtk-greeter-settings \
     shimmer-themes \
 #    network-manager-gnome \
     xinit \
@@ -97,6 +97,9 @@ RUN apt-get install -y \
 #    libreoffice
     gnumeric
  
+# Remove xfce4-screensaver
+RUN apt-get purge -y xfce4-screensaver
+
 # Install Google-chrome
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN apt install -y ./google-chrome-stable_current_amd64.deb
@@ -111,7 +114,7 @@ ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts
 RUN mkdir -p /etc/skel/.local/share && \ 
     cp -r ${parts}/local/share/icons /etc/skel/.local/share/ && \
     cp -r ${parts}/local/share/applications /etc/skel/.local/share/
-COPY google-chrome.desktop /etc/skel/.local/share/applications
+#COPY google-chrome.desktop /etc/skel/.local/share/applications
 
 # Customized menu
 RUN mkdir -p /etc/skel/.config/menus && \
@@ -134,16 +137,16 @@ RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
 RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
     rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
-COPY xfce4-session.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
+#COPY xfce4-session.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
 
-# Modified lightdm-gtk-greeter.conf
-RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
-    cp ${parts}/lightdm/lightdm-gtk-greeter.conf.d/01_ubuntu.conf /usr/share/lightdm/lightdm-gtk-greeter.conf.d
+## Modified lightdm-gtk-greeter.conf
+#RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
+#    cp ${parts}/lightdm/lightdm-gtk-greeter.conf.d/01_ubuntu.conf /usr/share/lightdm/lightdm-gtk-greeter.conf.d
 
-# Auto-login
-RUN mkdir -p /usr/share/lightdm/lightdm.conf.d && \
-    cp ${parts}/lightdm/lightdm.conf.d/10-ubuntu.conf \
- /usr/share/lightdm/lightdm.conf.d
+## Auto-login
+#RUN mkdir -p /usr/share/lightdm/lightdm.conf.d && \
+#    cp ${parts}/lightdm/lightdm.conf.d/10-ubuntu.conf \
+# /usr/share/lightdm/lightdm.conf.d
 
 # Clean packages
 RUN apt-get -y autoremove
@@ -151,8 +154,8 @@ RUN apt-get -y autoremove
 # alias
 RUN echo "alias open='xdg-open &> /dev/null'" >> /etc/skel/.bash_aliases
 
-# Deactivate screensaver
-RUN echo 'xset s off' >> /etc/skel/.xsession
+## Deactivate screensaver
+#RUN echo 'xset s off' >> /etc/skel/.xsession
 
 ##### Lin4Neuro settings end #####
 
@@ -277,13 +280,21 @@ export ANTSPATH=/usr/local/ANTs/bin\n\
 export PATH=$PATH:$ANTSPATH' >> /etc/skel/.bash_aliases
 
 # MCR
+#RUN cd /tmp/ && \
+#mkdir mcr_v913 && cd mcr_v913 && \
+#wget https://ssd.mathworks.com/supportfiles/downloads/R2022b/Release/10/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2022b_Update_10_glnxa64.zip && \
+#unzip MATLAB_Runtime_R2022b_Update_10_glnxa64.zip && \
+#./install -mode silent -agreeToLicense yes \
+#    -destinationFolder /usr/local/MATLAB/MCR/ && \
+#cd /tmp && rm -rf mcr_v913
+
 RUN cd /tmp/ && \
-mkdir mcr_v913 && cd mcr_v913 && \
-wget https://ssd.mathworks.com/supportfiles/downloads/R2022b/Release/10/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2022b_Update_10_glnxa64.zip && \
-unzip MATLAB_Runtime_R2022b_Update_10_glnxa64.zip && \
+mkdir mcr_r2024b && cd mcr_r2024b && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MATLAB_Runtime_R2024b_glnxa64.zip && \
+unzip MATLAB_Runtime_R2024b_glnxa64.zip && \
 ./install -mode silent -agreeToLicense yes \
     -destinationFolder /usr/local/MATLAB/MCR/ && \
-cd /tmp && rm -rf mcr_v913
+cd /tmp && rm -rf mcr_r2024b
 
 # NODDI
 RUN cd /usr/local && \
@@ -295,22 +306,23 @@ export PATH=$PATH:/usr/local/NODDI' >> /etc/skel/.bash_aliases
 
 # SPM12
 RUN cd /usr/local && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/spm12_standalone_jammy_R2022b.zip && \
-unzip spm12_standalone_jammy_R2022b.zip && \
-rm spm12_standalone_jammy_R2022b.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/spm12_standalone_jammy_R2024b.zip && \
+unzip spm12_standalone_jammy_R2024b.zip && \
+rm spm12_standalone_jammy_R2024b.zip && \
 cd spm12_standalone && \
 chmod 755 run_spm12.sh spm12 && \
 echo '' >> /etc/skel/.bash_aliases && \
 echo '#SPM12 standalone' >> /etc/skel/.bash_aliases && \
-echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2022b/'" >> /etc/skel/.bash_aliases
+echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2024b/'" >> /etc/skel/.bash_aliases
 
 # CONN 22v2407
 RUN cd /usr/local && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v2407_standalone.zip && \
-unzip conn22v2407_standalone.zip && rm conn22v2407_standalone.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v2407_standalone_jammy_R2024b.zip && \
+unzip conn22v2407_standalone_jammy_R2024b.zip && \
+rm conn22v2407_standalone_jammy_R2024b.zip && \
 echo '' >> /etc/skel/.bash_aliases && \
 echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
-echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2022b/'" >> /etc/skel/.bash_aliases
+echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/'" >> /etc/skel/.bash_aliases
 
 # FreeSurfer 7.4.1
 # Install dependencies
