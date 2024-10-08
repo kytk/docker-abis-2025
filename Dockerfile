@@ -95,15 +95,16 @@ RUN apt-get install -y \
 #    ristretto \
 #    pinta \
 #    libreoffice
-    gnumeric
+    gnumeric \
+    epiphany-browser
  
 # Remove xfce4-screensaver
 RUN apt-get purge -y xfce4-screensaver
 
-# Install Google-chrome
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN apt install -y ./google-chrome-stable_current_amd64.deb
-RUN rm google-chrome-stable_current_amd64.deb
+## Install Google-chrome
+#RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+#RUN apt install -y ./google-chrome-stable_current_amd64.deb
+#RUN rm google-chrome-stable_current_amd64.deb
 
 ##### Lin4Neuro #####
 RUN mkdir /etc/skel/git && cd /etc/skel/git && \
@@ -122,6 +123,8 @@ RUN mkdir -p /etc/skel/.config/menus && \
 
 # Customized panel, desktop, and theme
 RUN cp -r ${parts}/config/xfce4 /etc/skel/.config/
+RUN cp /usr/share/applications/org.gnome.Epiphany.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
+rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop
 
 # Desktop files
 RUN cp -r ${parts}/local/share/applications /etc/skel/.local/share/
