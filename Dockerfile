@@ -124,7 +124,9 @@ RUN mkdir -p /etc/skel/.config/menus && \
 # Customized panel, desktop, and theme
 RUN cp -r ${parts}/config/xfce4 /etc/skel/.config/
 RUN cp /usr/share/applications/org.gnome.Epiphany.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
-rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop
+rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop && \
+rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop
+
 
 # Desktop files
 RUN cp -r ${parts}/local/share/applications /etc/skel/.local/share/
