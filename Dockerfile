@@ -1,11 +1,12 @@
 ## Dockerfile to make "docker-abis-2025"
 ## This file makes a container image of docker-abis-2025
-## K. Nemoto 06 Oct 2024
+## K. Nemoto 09 Oct 2024
 
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+########## Part 1. Base of Container ##########
 # Install basic utilities and X11
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y \
@@ -106,63 +107,9 @@ RUN apt-get purge -y xfce4-screensaver
 #RUN apt install -y ./google-chrome-stable_current_amd64.deb
 #RUN rm google-chrome-stable_current_amd64.deb
 
-##### Lin4Neuro #####
-RUN mkdir /etc/skel/git && cd /etc/skel/git && \
-    git clone https://gitlab.com/kytk/lin4neuro-jammy.git
-ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts
+########## End of Part 1 ##########
 
-# Icons and Applications
-RUN mkdir -p /etc/skel/.local/share && \ 
-    cp -r ${parts}/local/share/icons /etc/skel/.local/share/ && \
-    cp -r ${parts}/local/share/applications /etc/skel/.local/share/
-
-# Customized menu
-RUN mkdir -p /etc/skel/.config/menus && \
-    cp ${parts}/config/menus/xfce-applications.menu /etc/skel/.config/menus
-
-# Customized panel, desktop, and theme
-RUN cp -r ${parts}/config/xfce4 /etc/skel/.config/
-RUN cp /usr/share/applications/org.gnome.Epiphany.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
-rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop && \
-rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop
-COPY xfce4-panel.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
-
-# Desktop files
-RUN cp -r ${parts}/local/share/applications /etc/skel/.local/share/
-
-
-# Neuroimaging.directory
-RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
-    cp ${parts}/local/share/desktop-directories/Neuroimaging.directory \
-       /etc/skel/.local/share/desktop-directories
-
-# Background image and remove an unnecessary image file
-# Disable lock screen
-RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
-    rm /usr/share/backgrounds/xfce/xfce-*.*p*g
-COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
-
-## Modified lightdm-gtk-greeter.conf
-#RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
-#    cp ${parts}/lightdm/lightdm-gtk-greeter.conf.d/01_ubuntu.conf /usr/share/lightdm/lightdm-gtk-greeter.conf.d
-
-## Auto-login
-#RUN mkdir -p /usr/share/lightdm/lightdm.conf.d && \
-#    cp ${parts}/lightdm/lightdm.conf.d/10-ubuntu.conf \
-# /usr/share/lightdm/lightdm.conf.d
-
-# Clean packages
-RUN apt-get -y autoremove
-
-# alias
-RUN echo "alias open='xdg-open &> /dev/null'" >> /etc/skel/.bash_aliases
-
-## Deactivate screensaver
-#RUN echo 'xset s off' >> /etc/skel/.xsession
-
-##### Lin4Neuro settings end #####
-
-##### Neuroimaging and related Software packages #####
+##### Part 2. Neuroimaging and related Software packages #####
 
 # DCMTK
 RUN apt-get install -y dcmtk
@@ -371,8 +318,65 @@ echo '\n\
 # kn-scripts \n\
 export PATH=$PATH:~/git/kn-scripts' >> /etc/skel/.bash_aliases
 
+########## End of Part 2 ##########
 
-##### End of Neuroimaging and Related Software packages #####
+########## Part 3. Lin4Neuro ##########
+RUN mkdir /etc/skel/git && cd /etc/skel/git && \
+    git clone https://gitlab.com/kytk/lin4neuro-jammy.git
+ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts
+
+# Icons and Applications
+RUN mkdir -p /etc/skel/.local/share && \ 
+    cp -r ${parts}/local/share/icons /etc/skel/.local/share/ && \
+    cp -r ${parts}/local/share/applications /etc/skel/.local/share/
+
+# Customized menu
+RUN mkdir -p /etc/skel/.config/menus && \
+    cp ${parts}/config/menus/xfce-applications.menu /etc/skel/.config/menus
+
+# Customized panel, desktop, and theme
+RUN cp -r ${parts}/config/xfce4 /etc/skel/.config/
+RUN cp /usr/share/applications/org.gnome.Epiphany.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
+rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop && \
+rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop
+COPY xfce4-panel.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
+
+# Desktop files
+RUN cp -r ${parts}/local/share/applications /etc/skel/.local/share/
+
+
+# Neuroimaging.directory
+RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
+    cp ${parts}/local/share/desktop-directories/Neuroimaging.directory \
+       /etc/skel/.local/share/desktop-directories
+
+# Background image and remove an unnecessary image file
+# Disable lock screen
+RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
+    rm /usr/share/backgrounds/xfce/xfce-*.*p*g
+COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
+
+## Modified lightdm-gtk-greeter.conf
+#RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
+#    cp ${parts}/lightdm/lightdm-gtk-greeter.conf.d/01_ubuntu.conf /usr/share/lightdm/lightdm-gtk-greeter.conf.d
+
+## Auto-login
+#RUN mkdir -p /usr/share/lightdm/lightdm.conf.d && \
+#    cp ${parts}/lightdm/lightdm.conf.d/10-ubuntu.conf \
+# /usr/share/lightdm/lightdm.conf.d
+
+# Clean packages
+RUN apt-get -y autoremove
+
+# alias
+RUN echo "alias open='xdg-open &> /dev/null'" >> /etc/skel/.bash_aliases
+
+## Deactivate screensaver
+#RUN echo 'xset s off' >> /etc/skel/.xsession
+
+########## End of Part 3 ##########
+
+########## Part 4. VNC ##########
 
 # Set up VNC
 RUN mkdir -p /root/.vnc && \
@@ -426,3 +430,6 @@ cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
 #CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+##### End of Part 4 ##########
+
