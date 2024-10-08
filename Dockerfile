@@ -115,7 +115,6 @@ ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts
 RUN mkdir -p /etc/skel/.local/share && \ 
     cp -r ${parts}/local/share/icons /etc/skel/.local/share/ && \
     cp -r ${parts}/local/share/applications /etc/skel/.local/share/
-#COPY google-chrome.desktop /etc/skel/.local/share/applications
 
 # Customized menu
 RUN mkdir -p /etc/skel/.config/menus && \
@@ -126,7 +125,7 @@ RUN cp -r ${parts}/config/xfce4 /etc/skel/.config/
 RUN cp /usr/share/applications/org.gnome.Epiphany.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
 rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop && \
 rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop
-
+COPY xfce4-panel.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
 
 # Desktop files
 RUN cp -r ${parts}/local/share/applications /etc/skel/.local/share/
@@ -142,7 +141,6 @@ RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
 RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
     rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
-#COPY xfce4-session.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
 
 ## Modified lightdm-gtk-greeter.conf
 #RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
