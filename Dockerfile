@@ -227,9 +227,9 @@ RUN cd /usr/local && wget http://www.lin4neuro.net/lin4neuro/neuroimaging_softwa
 #    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
 #    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
 RUN cd /usr/local/ && \
-    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/fsl-6.0.7.13-jammy.tar.gz && \
-    tar -xvf fsl-6.0.7.13-jammy.tar.gz && \
-    rm fsl-6.0.7.13-jammy.tar.gz && \ 
+    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/fsl-6.0.7.14-jammy.tar.gz && \
+    tar -xvf fsl-6.0.7.14-jammy.tar.gz && \
+    rm fsl-6.0.7.14-jammy.tar.gz && \ 
 echo '\n\
 # FSL Setup\n\
 FSLDIR=/usr/local/fsl\n\
@@ -304,8 +304,10 @@ cd /tmp && rm -rf mcr_r2024b
 
 # NODDI
 RUN cd /usr/local && \
-wget https://www.nemotos.net/l4n-abis/NODDI_linux.zip && \
-unzip NODDI_linux.zip && rm NODDI_linux.zip && \
+wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip && \
+unzip NODDI_jammy_R2024b.zip && rm NODDI_jammy_R2024b.zip && \
+cd NODDI && \
+chmod 755 NODDI run_NODDI.sh && \
 echo '\n\
 # NODDI\n\
 export PATH=$PATH:/usr/local/NODDI' >> /etc/skel/.bash_aliases
@@ -326,6 +328,8 @@ RUN cd /usr/local && \
 wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v2407_standalone_jammy_R2024b.zip && \
 unzip conn22v2407_standalone_jammy_R2024b.zip && \
 rm conn22v2407_standalone_jammy_R2024b.zip && \
+cd conn22v2407_standalone && \
+chmod 755 run_conn.sh conn && \
 echo '' >> /etc/skel/.bash_aliases && \
 echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
 echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/'" >> /etc/skel/.bash_aliases
