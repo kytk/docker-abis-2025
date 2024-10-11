@@ -99,17 +99,17 @@ RUN apt-get install -y \
     gnumeric \
     epiphany-browser 
 
-# Japanese environment
-RUN apt-get install -y \
-    language-pack-ja-base \
-    language-pack-ja \
-    fcitx-mozc 
-
-ENV LANG=ja_JP.UTF-8 \
-    LANGUAGE=ja_JP:ja \
-    LC_ALL=ja_JP.UTF-8
-
-RUN update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" LC_ALL=ja_JP.UTF-8 
+## Japanese environment
+#RUN apt-get install -y \
+#    language-pack-ja-base \
+#    language-pack-ja \
+#    fcitx-mozc 
+#
+#ENV LANG=ja_JP.UTF-8 \
+#    LANGUAGE=ja_JP:ja \
+#    LC_ALL=ja_JP.UTF-8
+#
+#RUN update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" LC_ALL=ja_JP.UTF-8 
 
 # Remove xfce4-screensaver
 RUN apt-get purge -y xfce4-screensaver
@@ -322,7 +322,8 @@ cd NODDI && \
 chmod 755 NODDI run_NODDI.sh && \
 echo '\n\
 # NODDI\n\
-export PATH=$PATH:/usr/local/NODDI' >> /etc/skel/.bash_aliases
+export PATH=$PATH:/usr/local/NODDI' >> /etc/skel/.bash_aliases && \
+echo "alias noddi='/usr/local/NODDI/run_NODDI.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
 
 # SPM12
 RUN cd /usr/local && \
@@ -333,7 +334,7 @@ cd spm12_standalone && \
 chmod 755 run_spm12.sh spm12 && \
 echo '' >> /etc/skel/.bash_aliases && \
 echo '#SPM12 standalone' >> /etc/skel/.bash_aliases && \
-echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2024b/'" >> /etc/skel/.bash_aliases
+echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
 
 # CONN 22v2407
 RUN cd /usr/local && \
@@ -344,7 +345,7 @@ cd conn22v2407_standalone && \
 chmod 755 run_conn.sh conn && \
 echo '' >> /etc/skel/.bash_aliases && \
 echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
-echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/'" >> /etc/skel/.bash_aliases
+echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/' 2>/dev/null" >> /etc/skel/.bash_aliases
 
 # FreeSurfer 7.4.1
 # Install dependencies
