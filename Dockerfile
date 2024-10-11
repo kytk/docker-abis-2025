@@ -176,10 +176,10 @@ RUN cp -r ${parts}/tdaemon /usr/local && \
     echo '#tdaemon' >> /etc/skel/.bash_aliases && \
     echo "alias tdaemon='java -jar /usr/local/tdaemon/talairach.jar'" >> /etc/skel/.bash_aliases
 
-## VirtualMRI
-#RUN cd /usr/local && \
-#    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/vmri.zip && \
-#    unzip vmri.zip && rm vmri.zip
+# VirtualMRI
+RUN cd /usr/local && \
+    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/vmri.zip && \
+    unzip vmri.zip && rm vmri.zip
 
 # Mango
 RUN cd /usr/local && \
@@ -243,9 +243,9 @@ RUN apt-get install -y octave
 
 # AlizaMS
 RUN cd /tmp && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
-apt install -y ./alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
-rm alizams_1.9.5+git0.c3ce1bd-1+1.1_amd64.deb && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
+apt install -y ./alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
+rm alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
 sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop
 
 # dcm2niix
