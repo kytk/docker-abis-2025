@@ -75,10 +75,10 @@ RUN apt-get install -y \
     vim  \
     zip \
     tcsh \
-    baobab \
+#    baobab \
 #    bleachbit \
     libopenblas-base \
-    cups \
+#    cups \
     apturl \
     dmz-cursor-theme \
 #    chntpw \
@@ -99,10 +99,18 @@ RUN apt-get install -y \
     gnumeric \
     epiphany-browser 
 
-# Japanese locale
-RUN apt-get install -y language-pack-ja-base language-pack-ja && \
-    update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja"
- 
+# Japanese environment
+RUN apt-get install -y \
+    language-pack-ja-base \
+    language-pack-ja \
+    fcitx-mozc 
+
+ENV LANG=ja_JP.UTF-8 \
+    LANGUAGE=ja_JP:ja \
+    LC_ALL=ja_JP.UTF-8
+
+RUN update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" LC_ALL=ja_JP.UTF-8 
+
 # Remove xfce4-screensaver
 RUN apt-get purge -y xfce4-screensaver
 
@@ -382,6 +390,10 @@ echo '\n\
 # kn-scripts \n\
 export PATH=$PATH:~/git/kn-scripts' >> /etc/skel/.bash_aliases
 
+# clean-up apt
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 ########## End of Part 3 ##########
 
 ########## Part 4. VNC ##########
@@ -414,7 +426,6 @@ RUN mkdir -p /home/brain/.vnc && \
 RUN mkdir -p /home/brain/logs && \
     chown -R brain:brain /home/brain/logs
 
-
 # Copy supervisord configuration
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
@@ -433,8 +444,6 @@ ENV USER=brain
 
 RUN mkdir -p ~/freesurfer/7.4.1 && \
 cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
-
-RUN source /etc/default/locale
 
 #CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
