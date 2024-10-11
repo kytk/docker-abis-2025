@@ -101,8 +101,7 @@ RUN apt-get install -y \
 
 # Japanese locale
 RUN apt-get install -y language-pack-ja-base language-pack-ja && \
-    update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" && \
-    source /etc/default/locale
+    update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja"
  
 # Remove xfce4-screensaver
 RUN apt-get purge -y xfce4-screensaver
@@ -435,6 +434,7 @@ ENV USER=brain
 RUN mkdir -p ~/freesurfer/7.4.1 && \
 cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
 
+RUN source /etc/default/locale
 
 #CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
