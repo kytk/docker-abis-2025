@@ -27,7 +27,7 @@ RUN apt-get update && apt-get upgrade -y && \
     build-essential  \
     dkms \
     thunar-archive-plugin \
-#    file-roller \
+    file-roller \
     gawk \
     xdg-utils \
     tightvncserver \
@@ -97,7 +97,12 @@ RUN apt-get install -y \
 #    pinta \
 #    libreoffice
     gnumeric \
-    epiphany-browser
+    epiphany-browser 
+
+# Japanese locale
+RUN apt-get install -y language-pack-ja-base language-pack-ja && \
+    update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" && \
+    source /etc/default/locale
  
 # Remove xfce4-screensaver
 RUN apt-get purge -y xfce4-screensaver
