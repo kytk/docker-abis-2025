@@ -345,7 +345,7 @@ cd conn22v2407_standalone && \
 chmod 755 run_conn.sh conn && \
 echo '' >> /etc/skel/.bash_aliases && \
 echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
-echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/' 2>/dev/null" >> /etc/skel/.bash_aliases
+echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
 
 # FreeSurfer 7.4.1
 # Install dependencies
