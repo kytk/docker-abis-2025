@@ -50,7 +50,7 @@ COPY --from=downloader /downloads /tmp/downloads
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
     xfce4 \
     xfce4-terminal \
     xfce4-indicator-plugin  \
@@ -91,7 +91,7 @@ RUN pip install numpy pandas pydicom gdcm dcm2bids heudiconv \
     python3 -m bash_kernel.install
 
 # Install utilities
-RUN apt-get install -y \
+RUN apt-get install -y --no-install-recommends \
     git \
     apt-utils \
     at-spi2-core \
@@ -186,14 +186,12 @@ COPY xfce4-panel.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
 # Desktop files
 RUN cp -r ${parts}/local/share/applications /etc/skel/.local/share/
 
-
 # Neuroimaging.directory
 RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
     cp ${parts}/local/share/desktop-directories/Neuroimaging.directory \
        /etc/skel/.local/share/desktop-directories
 
 # Background image and remove an unnecessary image file
-# Disable lock screen
 RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
     rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
@@ -343,39 +341,39 @@ unzip /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip && \
     -destinationFolder /usr/local/MATLAB/MCR/ && \
 cd /tmp && rm -rf mcr_r2024b
 
-# NODDI
-RUN cd /usr/local && \
-unzip /tmp/downloads/NODDI_jammy_R2024b.zip && \
-cd NODDI && \
-chmod 755 NODDI run_NODDI.sh && \
-echo '\n\
-# NODDI\n\
-export PATH=$PATH:/usr/local/NODDI' | tee -a /etc/skel/.bash_aliases && \
-echo "alias noddi='/usr/local/NODDI/run_NODDI.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" | tee -a /etc/skel/.bash_aliases
-
 # SPM12
 RUN cd /usr/local && \
 unzip /tmp/downloads/spm12_standalone_jammy_R2024b.zip && \
 cd spm12_standalone && \
 chmod 755 run_spm12.sh spm12 && \
-echo '\n\
-#SPM12 standalone' | tee -a /etc/skel/.bash_aliases && \
-echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" | tee -a /etc/skel/.bash_aliases
+echo '' >> /etc/skel/.bash_aliases && \
+echo '#SPM12 standalone' >> /etc/skel/.bash_aliases && \
+echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
 
 # CONN 22v2407
 RUN cd /usr/local && \
 unzip /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip && \
 cd conn22v2407_standalone && \
 chmod 755 run_conn.sh conn && \
-echo '\n\
-#CONN22v2407 standalone' | tee -a /etc/skel/.bash_aliases && \
-echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" | tee -a /etc/skel/.bash_aliases
+echo '' >> /etc/skel/.bash_aliases && \
+echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
+echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
+
+# NODDI
+RUN cd /usr/local && \
+unzip /tmp/downloads/NODDI_jammy_R2024b.zip && \
+cd NODDI && \
+chmod 755 NODDI run_NODDI.sh && \
+echo '' >> /etc/skel/.bash_aliases && \
+echo '# NODDI' >> /etc/skel/.bash_aliases && \
+echo 'export PATH=$PATH:/usr/local/NODDI' >> /etc/skel/.bash_aliases && \
+echo "alias noddi='/usr/local/NODDI/run_NODDI.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
 
 # FreeSurfer 7.4.1
 # Install dependencies
 RUN cd /usr/local && \
 mkdir freesurfer && cd freesurfer && \
-apt install -y binutils libx11-dev gettext x11-apps \
+apt install -y --no-install-recommends binutils libx11-dev gettext x11-apps \
   perl make csh tcsh bash file bc gzip tar \
   xorg xorg-dev xserver-xorg-video-intel libncurses5 libbsd0 libc6 libc6 \
   libcom-err2 libcrypt1 libdrm2 libegl1 libexpat1 libffi7 libfontconfig1 \
@@ -419,7 +417,6 @@ RUN apt-get clean && \
 ########## End of Part 3 ##########
 
 ########## Part 4. VNC ##########
-
 # Set up VNC
 RUN mkdir -p /root/.vnc && \
     echo "lin4neuro" | vncpasswd -f > /root/.vnc/passwd && \
@@ -436,7 +433,14 @@ cd /usr/local/spm12_standalone && \
 chmod 755 run_spm12.sh spm12
 
 # CONN settings
-RUN chown -R brain:brain /usr/local/conn22v2407_standalone
+RUN chown -R brain:brain /usr/local/conn22v2407_standalone && \
+cd /usr/local/conn22v2407_standalone && \
+chmod 755 run_conn.sh conn
+
+# NODDI settings
+RUN chown -R brain:brain /usr/local/NODDI && \
+cd /usr/local/NODDI && \
+chmod 755 run_NODDI.sh NODDI
 
 # Set up VNC for the new user
 RUN mkdir -p /home/brain/.vnc && \
@@ -464,10 +468,9 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 USER brain
 ENV USER=brain
 
+# Prepare FreeSurfer
 RUN mkdir -p ~/freesurfer/7.4.1 && \
 cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
-
-#CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 # Entrypoint
 COPY --chown=brain:brain docker-entrypoint.sh /usr/local/bin/
