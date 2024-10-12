@@ -210,8 +210,10 @@ COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
 # Clean packages
 RUN apt-get -y autoremove
 
-# alias
-RUN echo "alias open='xdg-open &> /dev/null'" | tee -a /etc/skel/.bash_aliases
+# alias and shopt
+RUN echo "alias open='xdg-open &> /dev/null'" | tee -a /etc/skel/.bash_aliases && \
+echo '\n\
+shopt -s direxpand' | tee -a /etc/skel/.bash_aliases
 
 ########## End of Part 2 ##########
 
@@ -222,8 +224,8 @@ RUN apt-get install -y dcmtk
 
 # Talairach Daemon
 RUN cp -r ${parts}/tdaemon /usr/local && \
-echo '\n\
-#tdaemon' | tee -a /etc/skel/.bash_aliases && \
+echo '' | tee -a /etc/skel/.bash_aliases && \
+echo '#tdaemon' | tee -a /etc/skel/.bash_aliases && \
 echo "alias tdaemon='java -jar /usr/local/tdaemon/talairach.jar'" | tee -a /etc/skel/.bash_aliases
 
 # VirtualMRI
