@@ -46,7 +46,7 @@ COPY --from=downloader /downloads /tmp/downloads
 
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
     xfce4 \
     xfce4-terminal \
     xfce4-indicator-plugin  \
