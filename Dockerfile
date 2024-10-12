@@ -6,7 +6,9 @@
 FROM ubuntu:22.04 AS downloader
 
 # wget
-RUN apt-get update && apt-get install -y wget
+RUN apt-get update && apt-get install -y wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Download binary files
 WORKDIR /downloads
@@ -34,9 +36,11 @@ FROM ubuntu:22.04
 
 # Environmental variables
 ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=UTC
-
-ENV RESOLUTION=1600x900x24
+    TZ=UTC \
+    RESOLUTION=1600x900x24 \
+    DISPLAY=:1 \
+    USER=brain \
+    parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts
 
 # Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -75,19 +79,24 @@ RUN apt-get update && apt-get install -y \
     x11vnc \
     xvfb \
     dbus-x11 \
-    sudo
+    sudo && \
+    python3-pip && \
+    python3-venv && \
+    python3-dev && \
+    python3-tk && \
+    python3-gpg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Python
-RUN apt-get install -y python3-pip python3-venv python3-dev python3-tk \
-    python3-gpg 
-
-RUN python3 -m pip install --upgrade pip
-RUN pip install numpy pandas pydicom gdcm dcm2bids heudiconv \
-     nipype nibabel jupyter notebook bash_kernel octave_kernel && \
+RUN python3 -m pip install --upgrade pip && \
+    pip install --no-cache-dir numpy pandas pydicom gdcm dcm2bids \
+    heudiconv nipype nibabel jupyter notebook \
+    bash_kernel octave_kernel && \
     python3 -m bash_kernel.install
 
 # Install utilities
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
     git \
     apt-utils \
     at-spi2-core \
@@ -134,7 +143,9 @@ RUN apt-get install -y \
 #    pinta \
 #    libreoffice
     gnumeric \
-    epiphany-browser 
+    epiphany-browser  && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 ## Japanese environment
 #RUN apt-get install -y \
@@ -159,7 +170,6 @@ RUN apt-get install -y \
 ########## End of Part 1 ##########
 
 ########## Part 2. Lin4Neuro ##########
-ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts
 RUN mkdir /etc/skel/git && cd /etc/skel/git && \
     git clone https://gitlab.com/kytk/lin4neuro-jammy.git && \
     # Icons and Applications
@@ -184,8 +194,7 @@ RUN mkdir /etc/skel/git && cd /etc/skel/git && \
     cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
     rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 
-COPY xfce4-panel.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
-COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
+COPY xfce4-panel.xml xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
 
 ## Modified lightdm-gtk-greeter.conf
 #RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
@@ -223,7 +232,7 @@ COPY bash_aliases /etc/skel/.bash_aliases
 # CONN 22v2407
 # NODDI
 # FSL
-RUN apt-get install -y dcmtk && \
+RUN apt-get update && apt-get install -y dcmtk && \
     cp -r ${parts}/tdaemon /usr/local && \
     cd /usr/local && \
     unzip /tmp/downloads/vmri.zip && \
@@ -285,7 +294,7 @@ RUN apt-get install -y dcmtk && \
 # Install dependencies
 RUN cd /usr/local && \
     mkdir freesurfer && cd freesurfer && \
-    apt install -y binutils libx11-dev gettext x11-apps \
+    apt-get install -y binutils libx11-dev gettext x11-apps \
       perl make csh tcsh bash file bc gzip tar \
       xorg xorg-dev xserver-xorg-video-intel libncurses5 libbsd0 libc6 libc6 \
       libcom-err2 libcrypt1 libdrm2 libegl1 libexpat1 libffi7 libfontconfig1 \
@@ -310,18 +319,16 @@ RUN cd /etc/skel/git && \
 
 # clean-up apt and /tmp/downloads
 RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /tmp/downloads
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 ########## End of Part 3 ##########
 
 ########## Part 4. VNC ##########
 # Set up VNC
+# Create a new user
 RUN mkdir -p /root/.vnc && \
     echo "lin4neuro" | vncpasswd -f > /root/.vnc/passwd && \
-    chmod 600 /root/.vnc/passwd
-
-# Create a new user
-RUN useradd -m -s /bin/bash brain && \
+    chmod 600 /root/.vnc/passwd && \
+    useradd -m -s /bin/bash brain && \
     echo "brain:lin4neuro" | chpasswd && \
     adduser brain sudo
 
@@ -351,8 +358,6 @@ RUN mkdir -p /home/brain/logs && \
 # Copy supervisord configuration
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-ENV DISPLAY=:1
-
 # expose port 6080
 EXPOSE 6080
 
@@ -362,7 +367,6 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 # Switch to the new user
 USER brain
-ENV USER=brain
 
 # Prepare FreeSurfer
 RUN mkdir -p ~/freesurfer/7.4.1 && \
