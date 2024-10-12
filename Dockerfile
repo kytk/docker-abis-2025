@@ -1,10 +1,49 @@
 ## Dockerfile to make "docker-abis-2025"
 ## This file makes a container image of docker-abis-2025
-## K. Nemoto 09 Oct 2024
+## K. Nemoto 12 Oct 2024
 
+# Download stage
+FROM ubuntu:22.04 AS downloader
+
+# curl and wget
+RUN apt-get update && apt-get install -y curl wget
+
+# Download binary files
+WORKDIR /downloads
+RUN \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/mango_unix.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MRIcroGL_linux.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MRIcron_linux.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/surfice_linux.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/vmri.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/fsl-6.0.7.14-jammy.tar.gz && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/mrtrix3_jammy.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/ANTs-jammy.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MATLAB_Runtime_R2024b_glnxa64.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v2407_standalone_jammy_R2024b.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/spm12_standalone_jammy_R2024b.zip && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+#wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip && \
+
+
+# Main stage
 FROM ubuntu:22.04
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Environmental variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8 \
+    TZ=UTC
+ENV RESOLUTION=1600x900x24
+
+# Timezone
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Copy binary files from Download stage
+COPY --from=downloader /downloads /tmp/downloads 
 
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
@@ -24,7 +63,7 @@ RUN apt-get update && apt-get upgrade -y && \
     shimmer-themes \
 #    network-manager-gnome \
     xinit \
-    build-essential  \
+#    build-essential  \
     dkms \
     thunar-archive-plugin \
     file-roller \
@@ -190,28 +229,26 @@ RUN cp -r ${parts}/tdaemon /usr/local && \
 
 # VirtualMRI
 RUN cd /usr/local && \
-    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/vmri.zip && \
-    unzip vmri.zip && rm vmri.zip
+    unzip /tmp/downloads/vmri.zip
 
 # Mango
 RUN cd /usr/local && \
-    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/mango_unix.zip && \
-    unzip mango_unix.zip && rm mango_unix.zip && \
+    unzip /tmp/downloads/mango_unix.zip && \
     echo '' >> /etc/skel/.bash_aliases && \
     echo '#Mango' >> /etc/skel/.bash_aliases && \
     echo 'export PATH=$PATH:/usr/local/Mango' >> /etc/skel/.bash_aliases
 
 # MRIcroGL
 RUN cd /usr/local &&  \
-    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MRIcroGL_linux.zip && unzip MRIcroGL_linux.zip && rm MRIcroGL_linux.zip && \
+    unzip /tmp/downloads/MRIcroGL_linux.zip && \
     echo '' >> /etc/skel/.bash_aliases && \
     echo '#MRIcroGL' >> /etc/skel/.bash_aliases && \
     echo 'export PATH=$PATH:/usr/local/MRIcroGL' >> /etc/skel/.bash_aliases && \
     echo 'export PATH=$PATH:/usr/local/MRIcroGL/Resources' >> /etc/skel/.bash_aliases
 
 # MRIcron
-RUN cd /usr/local && wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MRIcron_linux.zip && \
-    unzip MRIcron_linux.zip && rm MRIcron_linux.zip && \
+RUN cd /usr/local && \
+    unzip /tmp/downloads/MRIcron_linux.zip && \
     cd mricron && \
     find . -name 'dcm2niix' -exec rm {} \; && \
     find . -name '*.bat' -exec rm {} \; && \
@@ -223,8 +260,8 @@ RUN cd /usr/local && wget http://www.lin4neuro.net/lin4neuro/neuroimaging_softwa
     echo 'export PATH=$PATH:/usr/local/mricron' >> /etc/skel/.bash_aliases
 
 # Surf-Ice
-RUN cd /usr/local && wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/surfice_linux.zip && \
-    unzip surfice_linux.zip && rm surfice_linux.zip && \
+RUN cd /usr/local && \
+    unzip /tmp/downloads/surfice_linux.zip && \
     cd Surf_Ice && \
     find . -type d -exec chmod 755 {} \; && \
     find . -type f -exec chmod 644 {} \; && \
@@ -239,9 +276,7 @@ RUN cd /usr/local && wget http://www.lin4neuro.net/lin4neuro/neuroimaging_softwa
 #    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
 #    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
 RUN cd /usr/local/ && \
-    wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/fsl-6.0.7.14-jammy.tar.gz && \
-    tar -xvf fsl-6.0.7.14-jammy.tar.gz && \
-    rm fsl-6.0.7.14-jammy.tar.gz && \ 
+    tar -xvf /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz && \
 echo '\n\
 # FSL Setup\n\
 FSLDIR=/usr/local/fsl\n\
@@ -254,17 +289,13 @@ sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/f
 RUN apt-get install -y octave
 
 # AlizaMS
-RUN cd /tmp && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
-apt install -y ./alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
-rm alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
+RUN apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
 sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop
 
 # dcm2niix
 RUN cd /usr/local && \
 mkdir /usr/local/dcm2niix && \
-wget https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20240202/dcm2niix_lnx.zip && \
-unzip dcm2niix_lnx.zip -d /usr/local/dcm2niix && rm dcm2niix_lnx.zip && \
+unzip /tmp/downloads/dcm2niix_lnx.zip -d /usr/local/dcm2niix && \
 echo '' >> /etc/skel/.bash_aliases && \
 echo '# dcm2niix' >> /etc/skel/.bash_aliases && \
 echo 'export PATH=/usr/local/dcm2niix:$PATH' >> /etc/skel/.bash_aliases
@@ -282,16 +313,14 @@ RUN \
 #    libtiff5-dev \
 #    libpng-dev && \
 cd /usr/local && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/mrtrix3_jammy.zip && \
-unzip mrtrix3_jammy.zip && \
+unzip /tmp/downloads/mrtrix3_jammy.zip && \
 echo '\n\
 # MRtrix3\n\
 export PATH=$PATH:/usr/local/mrtrix3/bin' >> /etc/skel/.bash_aliases
 
 # ANTs
 RUN cd /usr/local && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/ANTs-jammy.zip && \
-unzip ANTs-jammy.zip && \
+unzip /tmp/downloads/ANTs-jammy.zip && \
 echo '\n\
 #ANTs\n\
 export ANTSPATH=/usr/local/ANTs/bin\n\
@@ -308,16 +337,14 @@ export PATH=$PATH:$ANTSPATH' >> /etc/skel/.bash_aliases
 
 RUN cd /tmp/ && \
 mkdir mcr_r2024b && cd mcr_r2024b && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MATLAB_Runtime_R2024b_glnxa64.zip && \
-unzip MATLAB_Runtime_R2024b_glnxa64.zip && \
+unzip /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip && \
 ./install -mode silent -agreeToLicense yes \
     -destinationFolder /usr/local/MATLAB/MCR/ && \
 cd /tmp && rm -rf mcr_r2024b
 
 # NODDI
 RUN cd /usr/local && \
-wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip && \
-unzip NODDI_jammy_R2024b.zip && rm NODDI_jammy_R2024b.zip && \
+unzip /tmp/downloads/NODDI_jammy_R2024b.zip && \
 cd NODDI && \
 chmod 755 NODDI run_NODDI.sh && \
 echo '\n\
@@ -327,9 +354,7 @@ echo "alias noddi='/usr/local/NODDI/run_NODDI.sh /usr/local/MATLAB/MCR/R2024b/ 2
 
 # SPM12
 RUN cd /usr/local && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/spm12_standalone_jammy_R2024b.zip && \
-unzip spm12_standalone_jammy_R2024b.zip && \
-rm spm12_standalone_jammy_R2024b.zip && \
+unzip /tmp/downloads/spm12_standalone_jammy_R2024b.zip && \
 cd spm12_standalone && \
 chmod 755 run_spm12.sh spm12 && \
 echo '' >> /etc/skel/.bash_aliases && \
@@ -338,9 +363,7 @@ echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/
 
 # CONN 22v2407
 RUN cd /usr/local && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v2407_standalone_jammy_R2024b.zip && \
-unzip conn22v2407_standalone_jammy_R2024b.zip && \
-rm conn22v2407_standalone_jammy_R2024b.zip && \
+unzip /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip && \
 cd conn22v2407_standalone && \
 chmod 755 run_conn.sh conn && \
 echo '' >> /etc/skel/.bash_aliases && \
@@ -365,10 +388,7 @@ apt install -y binutils libx11-dev gettext x11-apps \
   libxcb-xinput0 libxcb-xkb1 libxcb1 libxdmcp6 libxext6 libxft2 libxi6 \
   libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
   zlib1g && \
-#wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-tar -xvf freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-rm freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+tar -xvf /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
 mv freesurfer 7.4.1 && \
 echo '\n\
 #FreeSurfer 7.4.1\n\
@@ -391,10 +411,10 @@ echo '\n\
 # kn-scripts \n\
 export PATH=$PATH:~/git/kn-scripts' >> /etc/skel/.bash_aliases
 
-# clean-up apt
+# clean-up apt and /tmp/downloads
 RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/downloads
 ########## End of Part 3 ##########
 
 ########## Part 4. VNC ##########
@@ -432,12 +452,15 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 ENV DISPLAY=:1
 
+# expose port 6080
 EXPOSE 6080
 
-# Entrypoint
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Default screen resolution
+ENV RESOLUTION=1600x900x24
 
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+  CMD nc -z localhost 6080 || exit 1
 
 # Switch to the new user
 USER brain
@@ -448,6 +471,9 @@ cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
 
 #CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
+# Entrypoint
+COPY --chown=brain:brain docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 ##### End of Part 4 ##########
