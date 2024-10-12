@@ -5,8 +5,8 @@
 # Download stage
 FROM ubuntu:22.04 AS downloader
 
-# curl and wget
-RUN apt-get update && apt-get install -y curl wget
+# wget
+RUN apt-get update && apt-get install -y wget
 
 # Download binary files
 WORKDIR /downloads
@@ -34,9 +34,6 @@ FROM ubuntu:22.04
 
 # Environmental variables
 ENV DEBIAN_FRONTEND=noninteractive \
-    LANG=en_US.UTF-8 \
-    LANGUAGE=en_US:en \
-    LC_ALL=en_US.UTF-8 \
     TZ=UTC
 
 ENV RESOLUTION=1600x900x24
@@ -49,8 +46,7 @@ COPY --from=downloader /downloads /tmp/downloads
 
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
-RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get install -y \
     xfce4 \
     xfce4-terminal \
     xfce4-indicator-plugin  \
@@ -91,7 +87,7 @@ RUN pip install numpy pandas pydicom gdcm dcm2bids heudiconv \
     python3 -m bash_kernel.install
 
 # Install utilities
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get install -y \
     git \
     apt-utils \
     at-spi2-core \
@@ -116,7 +112,7 @@ RUN apt-get install -y --no-install-recommends \
     vim  \
     zip \
     tcsh \
-#    baobab \
+    baobab \
 #    bleachbit \
     libopenblas-base \
 #    cups \
@@ -153,7 +149,7 @@ RUN apt-get install -y --no-install-recommends \
 #RUN update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" LC_ALL=ja_JP.UTF-8 
 
 # Remove xfce4-screensaver
-RUN apt-get purge -y xfce4-screensaver
+#RUN apt-get purge -y xfce4-screensaver
 
 ## Install Google-chrome
 #RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -163,37 +159,32 @@ RUN apt-get purge -y xfce4-screensaver
 ########## End of Part 1 ##########
 
 ########## Part 2. Lin4Neuro ##########
-RUN mkdir /etc/skel/git && cd /etc/skel/git && \
-    git clone https://gitlab.com/kytk/lin4neuro-jammy.git
 ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts
-
-# Icons and Applications
-RUN mkdir -p /etc/skel/.local/share && \ 
+RUN mkdir /etc/skel/git && cd /etc/skel/git && \
+    git clone https://gitlab.com/kytk/lin4neuro-jammy.git && \
+    # Icons and Applications
+    mkdir -p /etc/skel/.local/share && \ 
     cp -r ${parts}/local/share/icons /etc/skel/.local/share/ && \
-    cp -r ${parts}/local/share/applications /etc/skel/.local/share/
-
-# Customized menu
-RUN mkdir -p /etc/skel/.config/menus && \
-    cp ${parts}/config/menus/xfce-applications.menu /etc/skel/.config/menus
-
-# Customized panel, desktop, and theme
-RUN cp -r ${parts}/config/xfce4 /etc/skel/.config/
-RUN cp /usr/share/applications/org.gnome.Epiphany.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
-rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop && \
-rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop
-COPY xfce4-panel.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
-
-# Desktop files
-RUN cp -r ${parts}/local/share/applications /etc/skel/.local/share/
-
-# Neuroimaging.directory
-RUN mkdir -p /etc/skel/.local/share/desktop-directories && \
+    cp -r ${parts}/local/share/applications /etc/skel/.local/share/ && \
+    # Customized menu
+    mkdir -p /etc/skel/.config/menus && \
+    cp ${parts}/config/menus/xfce-applications.menu /etc/skel/.config/menus && \
+    # Customized panel, desktop, and theme
+    cp -r ${parts}/config/xfce4 /etc/skel/.config/ && \
+    cp /usr/share/applications/org.gnome.Epiphany.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
+    rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop && \
+    rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop && \
+    # Desktop files
+    cp -r ${parts}/local/share/applications /etc/skel/.local/share/ && \
+    # Neuroimaging.directory
+    mkdir -p /etc/skel/.local/share/desktop-directories && \
     cp ${parts}/local/share/desktop-directories/Neuroimaging.directory \
-       /etc/skel/.local/share/desktop-directories
-
-# Background image and remove an unnecessary image file
-RUN cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
+       /etc/skel/.local/share/desktop-directories && \
+    # Background image and remove an unnecessary image file
+    cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
     rm /usr/share/backgrounds/xfce/xfce-*.*p*g
+
+COPY xfce4-panel.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
 COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
 
 ## Modified lightdm-gtk-greeter.conf
@@ -208,207 +199,114 @@ COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
 # Clean packages
 RUN apt-get -y autoremove
 
-# alias and shopt
-RUN echo "alias open='xdg-open &> /dev/null'" | tee -a /etc/skel/.bash_aliases && \
-echo '\n\
-shopt -s direxpand' | tee -a /etc/skel/.bash_aliases
+# .bash_aliases
+COPY bash_aliases /etc/skel/.bash_aliases
 
 ########## End of Part 2 ##########
 
 ##### Part 3. Neuroimaging and related Software packages #####
 
 # DCMTK
-RUN apt-get install -y dcmtk
-
 # Talairach Daemon
-RUN cp -r ${parts}/tdaemon /usr/local && \
-echo '' | tee -a /etc/skel/.bash_aliases && \
-echo '#tdaemon' | tee -a /etc/skel/.bash_aliases && \
-echo "alias tdaemon='java -jar /usr/local/tdaemon/talairach.jar'" | tee -a /etc/skel/.bash_aliases
-
 # VirtualMRI
-RUN cd /usr/local && \
-    unzip /tmp/downloads/vmri.zip
-
 # Mango
-RUN cd /usr/local && \
-unzip /tmp/downloads/mango_unix.zip && \
-echo '\n\
-#Mango\n\
-export PATH=$PATH:/usr/local/Mango' | tee -a /etc/skel/.bash_aliases
-
 # MRIcroGL
-RUN cd /usr/local &&  \
-unzip /tmp/downloads/MRIcroGL_linux.zip && \
-echo '\n\
-#MRIcroGL\n\
-export PATH=$PATH:/usr/local/MRIcroGL\n\
-export PATH=$PATH:/usr/local/MRIcroGL/Resources' | tee -a /etc/skel/.bash_aliases
-
 # MRIcron
-RUN cd /usr/local && \
-unzip /tmp/downloads/MRIcron_linux.zip && \
-cd mricron && \
-find . -name 'dcm2niix' -exec rm {} \; && \
-find . -name '*.bat' -exec rm {} \; && \
-find . -type d -exec chmod 755 {} \; && \
-find Resources -type f -exec chmod 644 {} \; && \
-chmod 755 /usr/local/mricron/Resources/pigz_mricron && \
-echo '\n\
-#MRIcron\n\
-export PATH=$PATH:/usr/local/mricron' | tee -a /etc/skel/.bash_aliases
-
 # Surf-Ice
-RUN cd /usr/local && \
-unzip /tmp/downloads/surfice_linux.zip && \
-cd Surf_Ice && \
-find . -type d -exec chmod 755 {} \; && \
-find . -type f -exec chmod 644 {} \; && \
-chmod 755 surfice* && \
-chmod 644 surfice_Linux_Installation.txt && \
-echo '\n\
-#Surf_Ice\n\
-export PATH=$PATH:/usr/local/Surf_Ice' | tee -a /etc/skel/.bash_aliases
-
+# Octave
+# AlizaMS
+# dcm2niix
+# MRtrix3
+# ANTs
+# MCR
+# SPM12
+# CONN 22v2407
+# NODDI
 # FSL
+RUN apt-get install -y dcmtk && \
+    cp -r ${parts}/tdaemon /usr/local && \
+    cd /usr/local && \
+    unzip /tmp/downloads/vmri.zip && \
+    cd /usr/local && \
+    unzip /tmp/downloads/mango_unix.zip && \
+    cd /usr/local &&  \
+    unzip /tmp/downloads/MRIcroGL_linux.zip && \
+    cd /usr/local && \
+    unzip /tmp/downloads/MRIcron_linux.zip && \
+    cd mricron && \
+    find . -name 'dcm2niix' -exec rm {} \; && \
+    find . -name '*.bat' -exec rm {} \; && \
+    find . -type d -exec chmod 755 {} \; && \
+    find Resources -type f -exec chmod 644 {} \; && \
+    chmod 755 /usr/local/mricron/Resources/pigz_mricron && \
+    cd /usr/local && \
+    unzip /tmp/downloads/surfice_linux.zip && \
+    cd Surf_Ice && \
+    find . -type d -exec chmod 755 {} \; && \
+    find . -type f -exec chmod 644 {} \; && \
+    chmod 755 surfice* && \
+    chmod 644 surfice_Linux_Installation.txt && \
+    apt-get install -y octave && \
+    apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
+    sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop && \
+    cd /usr/local && \
+    mkdir /usr/local/dcm2niix && \
+    unzip /tmp/downloads/dcm2niix_lnx.zip -d /usr/local/dcm2niix && \
+    cd /usr/local && \
+    unzip /tmp/downloads/mrtrix3_jammy.zip && \
+    cd /usr/local && \
+    unzip /tmp/downloads/ANTs-jammy.zip && \
+    cd /tmp/ && \
+    mkdir mcr_r2024b && cd mcr_r2024b && \
+    unzip /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip && \
+    ./install -mode silent -agreeToLicense yes \
+      -destinationFolder /usr/local/MATLAB/MCR/ && \
+    cd /tmp && rm -rf mcr_r2024b && \
+    cd /usr/local && \
+    unzip /tmp/downloads/spm12_standalone_jammy_R2024b.zip && \
+    cd spm12_standalone && \
+    chmod 755 run_spm12.sh spm12 && \
+    cd /usr/local && \
+    unzip /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip && \
+    cd conn22v2407_standalone && \
+    chmod 755 run_conn.sh conn && \
+    cd /usr/local && \
+    unzip /tmp/downloads/NODDI_jammy_R2024b.zip && \
+    cd NODDI && \
+    chmod 755 NODDI run_NODDI.sh && \
+    cd /usr/local/ && \
+    tar -xvf /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz && \
+    sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop
 # RUN cd /tmp && \
 #    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
 #    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
-RUN cd /usr/local/ && \
-    tar -xvf /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz && \
-echo '\n\
-# FSL Setup\n\
-FSLDIR=/usr/local/fsl\n\
-PATH=${FSLDIR}/share/fsl/bin:${PATH}\n\
-export FSLDIR PATH\n\
-. ${FSLDIR}/etc/fslconf/fsl.sh' | tee -a /etc/skel/.bash_aliases && \
-sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop
-
-# Octave
-RUN apt-get install -y octave
-
-# AlizaMS
-RUN apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
-sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop
-
-# dcm2niix
-RUN cd /usr/local && \
-mkdir /usr/local/dcm2niix && \
-unzip /tmp/downloads/dcm2niix_lnx.zip -d /usr/local/dcm2niix && \
-echo '\n\
-# dcm2niix\n\
-export PATH=/usr/local/dcm2niix:$PATH' | tee -a /etc/skel/.bash_aliases
-
-# MRtrix3
-RUN \
-# apt-get install -y \
-#    g++ \
-#    libeigen3-dev \
-#    zlib1g-dev \
-#    libqt5opengl5-dev \
-#    libqt5svg5-dev \
-#    libgl1-mesa-dev \
-#    libfftw3-dev \
-#    libtiff5-dev \
-#    libpng-dev && \
-cd /usr/local && \
-unzip /tmp/downloads/mrtrix3_jammy.zip && \
-echo '\n\
-# MRtrix3\n\
-export PATH=$PATH:/usr/local/mrtrix3/bin' | tee -a /etc/skel/.bash_aliases
-
-# ANTs
-RUN cd /usr/local && \
-unzip /tmp/downloads/ANTs-jammy.zip && \
-echo '\n\
-#ANTs\n\
-export ANTSPATH=/usr/local/ANTs/bin\n\
-export PATH=$PATH:$ANTSPATH' | tee -a /etc/skel/.bash_aliases
-
-# MCR
-#RUN cd /tmp/ && \
-#mkdir mcr_v913 && cd mcr_v913 && \
-#wget https://ssd.mathworks.com/supportfiles/downloads/R2022b/Release/10/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2022b_Update_10_glnxa64.zip && \
-#unzip MATLAB_Runtime_R2022b_Update_10_glnxa64.zip && \
-#./install -mode silent -agreeToLicense yes \
-#    -destinationFolder /usr/local/MATLAB/MCR/ && \
-#cd /tmp && rm -rf mcr_v913
-
-RUN cd /tmp/ && \
-mkdir mcr_r2024b && cd mcr_r2024b && \
-unzip /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip && \
-./install -mode silent -agreeToLicense yes \
-    -destinationFolder /usr/local/MATLAB/MCR/ && \
-cd /tmp && rm -rf mcr_r2024b
-
-# SPM12
-RUN cd /usr/local && \
-unzip /tmp/downloads/spm12_standalone_jammy_R2024b.zip && \
-cd spm12_standalone && \
-chmod 755 run_spm12.sh spm12 && \
-echo '' >> /etc/skel/.bash_aliases && \
-echo '#SPM12 standalone' >> /etc/skel/.bash_aliases && \
-echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
-
-# CONN 22v2407
-RUN cd /usr/local && \
-unzip /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip && \
-cd conn22v2407_standalone && \
-chmod 755 run_conn.sh conn && \
-echo '' >> /etc/skel/.bash_aliases && \
-echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
-echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
-
-# NODDI
-RUN cd /usr/local && \
-unzip /tmp/downloads/NODDI_jammy_R2024b.zip && \
-cd NODDI && \
-chmod 755 NODDI run_NODDI.sh && \
-echo '' >> /etc/skel/.bash_aliases && \
-echo '# NODDI' >> /etc/skel/.bash_aliases && \
-echo 'export PATH=$PATH:/usr/local/NODDI' >> /etc/skel/.bash_aliases && \
-echo "alias noddi='/usr/local/NODDI/run_NODDI.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
 
 # FreeSurfer 7.4.1
 # Install dependencies
 RUN cd /usr/local && \
-mkdir freesurfer && cd freesurfer && \
-apt install -y --no-install-recommends binutils libx11-dev gettext x11-apps \
-  perl make csh tcsh bash file bc gzip tar \
-  xorg xorg-dev xserver-xorg-video-intel libncurses5 libbsd0 libc6 libc6 \
-  libcom-err2 libcrypt1 libdrm2 libegl1 libexpat1 libffi7 libfontconfig1 \
-  libfreetype6 libgcc-s1 libgl1 libglib2.0-0 libglu1-mesa libglvnd0 libglx0 \
-  libgomp1 libgssapi-krb5-2 libice6 libjpeg62 libk5crypto3 libkeyutils1 \
-  libkrb5-3 libkrb5support0 libpcre3 libpng16-16 libquadmath0 libsm6 \
-  libstdc++6 libuuid1 libwayland-client0 libwayland-cursor0 libx11-6 \
-  libx11-xcb1 libxau6 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
-  libxcb-randr0 libxcb-render-util0 libxcb-render0 libxcb-shape0 \
-  libxcb-shm0 libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xinerama0 \
-  libxcb-xinput0 libxcb-xkb1 libxcb1 libxdmcp6 libxext6 libxft2 libxi6 \
-  libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
-  zlib1g && \
-tar -xvf /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-mv freesurfer 7.4.1 && \
-echo '\n\
-#FreeSurfer 7.4.1\n\
-export SUBJECTS_DIR=~/freesurfer/7.4.1/subjects\n\
-export FREESURFER_HOME=/usr/local/freesurfer/7.4.1\n\
-export FS_LICENSE=~/share/license.txt\n\
-source $FREESURFER_HOME/SetUpFreeSurfer.sh' | tee -a /etc/skel/.bash_aliases
+    mkdir freesurfer && cd freesurfer && \
+    apt install -y binutils libx11-dev gettext x11-apps \
+      perl make csh tcsh bash file bc gzip tar \
+      xorg xorg-dev xserver-xorg-video-intel libncurses5 libbsd0 libc6 libc6 \
+      libcom-err2 libcrypt1 libdrm2 libegl1 libexpat1 libffi7 libfontconfig1 \
+      libfreetype6 libgcc-s1 libgl1 libglib2.0-0 libglu1-mesa libglvnd0 libglx0 \
+      libgomp1 libgssapi-krb5-2 libice6 libjpeg62 libk5crypto3 libkeyutils1 \
+      libkrb5-3 libkrb5support0 libpcre3 libpng16-16 libquadmath0 libsm6 \
+      libstdc++6 libuuid1 libwayland-client0 libwayland-cursor0 libx11-6 \
+      libx11-xcb1 libxau6 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+      libxcb-randr0 libxcb-render-util0 libxcb-render0 libxcb-shape0 \
+      libxcb-shm0 libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xinerama0 \
+      libxcb-xinput0 libxcb-xkb1 libxcb1 libxdmcp6 libxext6 libxft2 libxi6 \
+      libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
+      zlib1g && \
+    tar -xvf /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+    mv freesurfer 7.4.1 && \
 
 # fs-scripts
-RUN cd /etc/skel/git && \
-git clone https://gitlab.com/kytk/fs-scripts.git && \
-echo '\n\
-# fs-scripts \n\
-export PATH=$PATH:~/git/fs-scripts' | tee -a /etc/skel/.bash_aliases
-
 # kn-scripts
 RUN cd /etc/skel/git && \
-git clone https://gitlab.com/kytk/kn-scripts.git && \
-echo '\n\
-# kn-scripts \n\
-export PATH=$PATH:~/git/kn-scripts' | tee -a /etc/skel/.bash_aliases
+    git clone https://gitlab.com/kytk/fs-scripts.git && \
+    git clone https://gitlab.com/kytk/kn-scripts.git && \
 
 # clean-up apt and /tmp/downloads
 RUN apt-get clean && \
@@ -428,19 +326,17 @@ RUN useradd -m -s /bin/bash brain && \
     adduser brain sudo
 
 # SPM settings
-RUN chown -R brain:brain /usr/local/spm12_standalone && \
-cd /usr/local/spm12_standalone && \
-chmod 755 run_spm12.sh spm12
-
 # CONN settings
-RUN chown -R brain:brain /usr/local/conn22v2407_standalone && \
-cd /usr/local/conn22v2407_standalone && \
-chmod 755 run_conn.sh conn
-
 # NODDI settings
-RUN chown -R brain:brain /usr/local/NODDI && \
-cd /usr/local/NODDI && \
-chmod 755 run_NODDI.sh NODDI
+RUN chown -R brain:brain /usr/local/spm12_standalone && \
+    cd /usr/local/spm12_standalone && \
+    chmod 755 run_spm12.sh spm12 && \
+    chown -R brain:brain /usr/local/conn22v2407_standalone && \
+    cd /usr/local/conn22v2407_standalone && \
+    chmod 755 run_conn.sh conn && \
+    chown -R brain:brain /usr/local/NODDI && \
+    cd /usr/local/NODDI && \
+    chmod 755 run_NODDI.sh NODDI
 
 # Set up VNC for the new user
 RUN mkdir -p /home/brain/.vnc && \
@@ -474,7 +370,7 @@ cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
 
 # Entrypoint
 COPY --chown=brain:brain docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod 755 /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 ##### End of Part 4 ##########
