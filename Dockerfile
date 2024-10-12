@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y curl wget
 WORKDIR /downloads
 RUN \
 wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
+wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/dcm2niix_lnx.zip && \
 wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/mango_unix.zip && \
 wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MRIcroGL_linux.zip && \
 wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MRIcron_linux.zip && \
@@ -25,7 +26,7 @@ wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v24
 wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/spm12_standalone_jammy_R2024b.zip && \
 wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
 #wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip && \
+wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip
 
 
 # Main stage
@@ -37,6 +38,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8 \
     TZ=UTC
+
 ENV RESOLUTION=1600x900x24
 
 # Timezone
@@ -209,10 +211,7 @@ COPY xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/
 RUN apt-get -y autoremove
 
 # alias
-RUN echo "alias open='xdg-open &> /dev/null'" >> /etc/skel/.bash_aliases
-
-## Deactivate screensaver
-#RUN echo 'xset s off' >> /etc/skel/.xsession
+RUN echo "alias open='xdg-open &> /dev/null'" | tee -a /etc/skel/.bash_aliases
 
 ########## End of Part 2 ##########
 
@@ -223,9 +222,9 @@ RUN apt-get install -y dcmtk
 
 # Talairach Daemon
 RUN cp -r ${parts}/tdaemon /usr/local && \
-    echo '' >> /etc/skel/.bash_aliases && \
-    echo '#tdaemon' >> /etc/skel/.bash_aliases && \
-    echo "alias tdaemon='java -jar /usr/local/tdaemon/talairach.jar'" >> /etc/skel/.bash_aliases
+echo '\n\
+#tdaemon' | tee -a /etc/skel/.bash_aliases && \
+echo "alias tdaemon='java -jar /usr/local/tdaemon/talairach.jar'" | tee -a /etc/skel/.bash_aliases
 
 # VirtualMRI
 RUN cd /usr/local && \
@@ -233,43 +232,43 @@ RUN cd /usr/local && \
 
 # Mango
 RUN cd /usr/local && \
-    unzip /tmp/downloads/mango_unix.zip && \
-    echo '' >> /etc/skel/.bash_aliases && \
-    echo '#Mango' >> /etc/skel/.bash_aliases && \
-    echo 'export PATH=$PATH:/usr/local/Mango' >> /etc/skel/.bash_aliases
+unzip /tmp/downloads/mango_unix.zip && \
+echo '\n\
+#Mango\n\
+export PATH=$PATH:/usr/local/Mango' | tee -a /etc/skel/.bash_aliases
 
 # MRIcroGL
 RUN cd /usr/local &&  \
-    unzip /tmp/downloads/MRIcroGL_linux.zip && \
-    echo '' >> /etc/skel/.bash_aliases && \
-    echo '#MRIcroGL' >> /etc/skel/.bash_aliases && \
-    echo 'export PATH=$PATH:/usr/local/MRIcroGL' >> /etc/skel/.bash_aliases && \
-    echo 'export PATH=$PATH:/usr/local/MRIcroGL/Resources' >> /etc/skel/.bash_aliases
+unzip /tmp/downloads/MRIcroGL_linux.zip && \
+echo '\n\
+#MRIcroGL\n\
+export PATH=$PATH:/usr/local/MRIcroGL\n\
+export PATH=$PATH:/usr/local/MRIcroGL/Resources' | tee -a /etc/skel/.bash_aliases
 
 # MRIcron
 RUN cd /usr/local && \
-    unzip /tmp/downloads/MRIcron_linux.zip && \
-    cd mricron && \
-    find . -name 'dcm2niix' -exec rm {} \; && \
-    find . -name '*.bat' -exec rm {} \; && \
-    find . -type d -exec chmod 755 {} \; && \
-    find Resources -type f -exec chmod 644 {} \; && \
-    chmod 755 /usr/local/mricron/Resources/pigz_mricron && \
-    echo '' >> /etc/skel/.bash_aliases && \
-    echo '#MRIcron' >> /etc/skel/.bash_aliases && \
-    echo 'export PATH=$PATH:/usr/local/mricron' >> /etc/skel/.bash_aliases
+unzip /tmp/downloads/MRIcron_linux.zip && \
+cd mricron && \
+find . -name 'dcm2niix' -exec rm {} \; && \
+find . -name '*.bat' -exec rm {} \; && \
+find . -type d -exec chmod 755 {} \; && \
+find Resources -type f -exec chmod 644 {} \; && \
+chmod 755 /usr/local/mricron/Resources/pigz_mricron && \
+echo '\n\
+#MRIcron\n\
+export PATH=$PATH:/usr/local/mricron' | tee -a /etc/skel/.bash_aliases
 
 # Surf-Ice
 RUN cd /usr/local && \
-    unzip /tmp/downloads/surfice_linux.zip && \
-    cd Surf_Ice && \
-    find . -type d -exec chmod 755 {} \; && \
-    find . -type f -exec chmod 644 {} \; && \
-    chmod 755 surfice* && \
-    chmod 644 surfice_Linux_Installation.txt && \
-    echo '' >> /etc/skel/.bash_aliases && \
-    echo '#Surf_Ice' >> /etc/skel/.bash_aliases && \
-    echo 'export PATH=$PATH:/usr/local/Surf_Ice' >> /etc/skel/.bash_aliases
+unzip /tmp/downloads/surfice_linux.zip && \
+cd Surf_Ice && \
+find . -type d -exec chmod 755 {} \; && \
+find . -type f -exec chmod 644 {} \; && \
+chmod 755 surfice* && \
+chmod 644 surfice_Linux_Installation.txt && \
+echo '\n\
+#Surf_Ice\n\
+export PATH=$PATH:/usr/local/Surf_Ice' | tee -a /etc/skel/.bash_aliases
 
 # FSL
 # RUN cd /tmp && \
@@ -282,7 +281,7 @@ echo '\n\
 FSLDIR=/usr/local/fsl\n\
 PATH=${FSLDIR}/share/fsl/bin:${PATH}\n\
 export FSLDIR PATH\n\
-. ${FSLDIR}/etc/fslconf/fsl.sh' >> /etc/skel/.bash_aliases && \
+. ${FSLDIR}/etc/fslconf/fsl.sh' | tee -a /etc/skel/.bash_aliases && \
 sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop
 
 # Octave
@@ -296,9 +295,9 @@ sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/a
 RUN cd /usr/local && \
 mkdir /usr/local/dcm2niix && \
 unzip /tmp/downloads/dcm2niix_lnx.zip -d /usr/local/dcm2niix && \
-echo '' >> /etc/skel/.bash_aliases && \
-echo '# dcm2niix' >> /etc/skel/.bash_aliases && \
-echo 'export PATH=/usr/local/dcm2niix:$PATH' >> /etc/skel/.bash_aliases
+echo '\n\
+# dcm2niix\n\
+export PATH=/usr/local/dcm2niix:$PATH' | tee -a /etc/skel/.bash_aliases
 
 # MRtrix3
 RUN \
@@ -316,7 +315,7 @@ cd /usr/local && \
 unzip /tmp/downloads/mrtrix3_jammy.zip && \
 echo '\n\
 # MRtrix3\n\
-export PATH=$PATH:/usr/local/mrtrix3/bin' >> /etc/skel/.bash_aliases
+export PATH=$PATH:/usr/local/mrtrix3/bin' | tee -a /etc/skel/.bash_aliases
 
 # ANTs
 RUN cd /usr/local && \
@@ -324,7 +323,7 @@ unzip /tmp/downloads/ANTs-jammy.zip && \
 echo '\n\
 #ANTs\n\
 export ANTSPATH=/usr/local/ANTs/bin\n\
-export PATH=$PATH:$ANTSPATH' >> /etc/skel/.bash_aliases
+export PATH=$PATH:$ANTSPATH' | tee -a /etc/skel/.bash_aliases
 
 # MCR
 #RUN cd /tmp/ && \
@@ -349,26 +348,26 @@ cd NODDI && \
 chmod 755 NODDI run_NODDI.sh && \
 echo '\n\
 # NODDI\n\
-export PATH=$PATH:/usr/local/NODDI' >> /etc/skel/.bash_aliases && \
-echo "alias noddi='/usr/local/NODDI/run_NODDI.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
+export PATH=$PATH:/usr/local/NODDI' | tee -a /etc/skel/.bash_aliases && \
+echo "alias noddi='/usr/local/NODDI/run_NODDI.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" | tee -a /etc/skel/.bash_aliases
 
 # SPM12
 RUN cd /usr/local && \
 unzip /tmp/downloads/spm12_standalone_jammy_R2024b.zip && \
 cd spm12_standalone && \
 chmod 755 run_spm12.sh spm12 && \
-echo '' >> /etc/skel/.bash_aliases && \
-echo '#SPM12 standalone' >> /etc/skel/.bash_aliases && \
-echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
+echo '\n\
+#SPM12 standalone' | tee -a /etc/skel/.bash_aliases && \
+echo "alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" | tee -a /etc/skel/.bash_aliases
 
 # CONN 22v2407
 RUN cd /usr/local && \
 unzip /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip && \
 cd conn22v2407_standalone && \
 chmod 755 run_conn.sh conn && \
-echo '' >> /etc/skel/.bash_aliases && \
-echo '#CONN22v2407 standalone' >> /etc/skel/.bash_aliases && \
-echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" >> /etc/skel/.bash_aliases
+echo '\n\
+#CONN22v2407 standalone' | tee -a /etc/skel/.bash_aliases && \
+echo "alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b/ 2>/dev/null'" | tee -a /etc/skel/.bash_aliases
 
 # FreeSurfer 7.4.1
 # Install dependencies
@@ -395,21 +394,21 @@ echo '\n\
 export SUBJECTS_DIR=~/freesurfer/7.4.1/subjects\n\
 export FREESURFER_HOME=/usr/local/freesurfer/7.4.1\n\
 export FS_LICENSE=~/share/license.txt\n\
-source $FREESURFER_HOME/SetUpFreeSurfer.sh' >> /etc/skel/.bash_aliases
+source $FREESURFER_HOME/SetUpFreeSurfer.sh' | tee -a /etc/skel/.bash_aliases
 
 # fs-scripts
 RUN cd /etc/skel/git && \
 git clone https://gitlab.com/kytk/fs-scripts.git && \
 echo '\n\
 # fs-scripts \n\
-export PATH=$PATH:~/git/fs-scripts' >> /etc/skel/.bash_aliases
+export PATH=$PATH:~/git/fs-scripts' | tee -a /etc/skel/.bash_aliases
 
 # kn-scripts
 RUN cd /etc/skel/git && \
 git clone https://gitlab.com/kytk/kn-scripts.git && \
 echo '\n\
 # kn-scripts \n\
-export PATH=$PATH:~/git/kn-scripts' >> /etc/skel/.bash_aliases
+export PATH=$PATH:~/git/kn-scripts' | tee -a /etc/skel/.bash_aliases
 
 # clean-up apt and /tmp/downloads
 RUN apt-get clean && \
@@ -454,9 +453,6 @@ ENV DISPLAY=:1
 
 # expose port 6080
 EXPOSE 6080
-
-# Default screen resolution
-ENV RESOLUTION=1600x900x24
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
