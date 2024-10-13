@@ -317,7 +317,7 @@ RUN cd /usr/local && \
 # kn-scripts
 RUN cd /etc/skel/git && \
     git clone https://gitlab.com/kytk/fs-scripts.git && \
-    git clone https://gitlab.com/kytk/kn-scripts.git && \
+    git clone https://gitlab.com/kytk/kn-scripts.git 
 
 # clean-up apt and /tmp/downloads
 RUN apt-get clean && \
