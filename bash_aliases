@@ -38,7 +38,7 @@ export PATH=$PATH:/home/kiyotaka/git/fs-scripts
 export PATH=/usr/local/dcm2niix:$PATH
 
 #SPM12 standalone
-alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2022b 2>/dev/null'
+alias spm='/usr/local/spm12_standalone/run_spm12.sh /usr/local/MATLAB/MCR/R2024b 2>/dev/null'
 
 #conn22v2407 standalone
 alias conn='/usr/local/conn22v2407_standalone/run_conn.sh /usr/local/MATLAB/MCR/R2024b 2>/dev/null'
