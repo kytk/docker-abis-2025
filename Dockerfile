@@ -10,25 +10,27 @@ RUN apt-get update && apt-get install -y wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Set base URL as an environment variable
+ENV BASE_URL="http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages"
+
 # Download binary files
 WORKDIR /downloads
-RUN \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/dcm2niix_lnx.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/mango_unix.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MRIcroGL_linux.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MRIcron_linux.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/surfice_linux.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/vmri.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/fsl-6.0.7.14-jammy.tar.gz && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/mrtrix3_jammy.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/ANTs-jammy.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/MATLAB_Runtime_R2024b_glnxa64.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/conn22v2407_standalone_jammy_R2024b.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/spm12_standalone_jammy_R2024b.zip && \
-wget http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-#wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip
+RUN wget ${BASE_URL}/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
+    wget ${BASE_URL}/dcm2niix_lnx.zip && \
+    wget ${BASE_URL}/mango_unix.zip && \
+    wget ${BASE_URL}/MRIcroGL_linux.zip && \
+    wget ${BASE_URL}/MRIcron_linux.zip && \
+    wget ${BASE_URL}/surfice_linux.zip && \
+    wget ${BASE_URL}/vmri.zip && \
+    wget ${BASE_URL}/fsl-6.0.7.14-jammy.tar.gz && \
+    wget ${BASE_URL}/mrtrix3_jammy.zip && \
+    wget ${BASE_URL}/ANTs-jammy.zip && \
+    wget ${BASE_URL}/MATLAB_Runtime_R2024b_glnxa64.zip && \
+    wget ${BASE_URL}/conn22v2407_standalone_jammy_R2024b.zip && \
+    wget ${BASE_URL}/spm12_standalone_jammy_R2024b.zip && \
+    wget ${BASE_URL}/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
+    wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip
+    #wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
 
 
 # Main stage
@@ -79,11 +81,11 @@ RUN apt-get update && apt-get install -y \
     x11vnc \
     xvfb \
     dbus-x11 \
-    sudo && \
-    python3-pip && \
-    python3-venv && \
-    python3-dev && \
-    python3-tk && \
+    sudo \
+    python3-pip \
+    python3-venv \
+    python3-dev \
+    python3-tk \
     python3-gpg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
