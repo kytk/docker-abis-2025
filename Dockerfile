@@ -15,23 +15,22 @@ ENV BASE_URL="http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages"
 
 # Download binary files
 WORKDIR /downloads
-RUN wget ${BASE_URL}/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
-    wget ${BASE_URL}/dcm2niix_lnx.zip && \
-    wget ${BASE_URL}/mango_unix.zip && \
-    wget ${BASE_URL}/MRIcroGL_linux.zip && \
-    wget ${BASE_URL}/MRIcron_linux.zip && \
-    wget ${BASE_URL}/surfice_linux.zip && \
-    wget ${BASE_URL}/vmri.zip && \
-    wget ${BASE_URL}/fsl-6.0.7.14-jammy.tar.gz && \
-    wget ${BASE_URL}/mrtrix3_jammy.zip && \
-    wget ${BASE_URL}/ANTs-jammy.zip && \
-    wget ${BASE_URL}/MATLAB_Runtime_R2024b_glnxa64.zip && \
-    wget ${BASE_URL}/conn22v2407_standalone_jammy_R2024b.zip && \
-    wget ${BASE_URL}/spm12_standalone_jammy_R2024b.zip && \
-    wget ${BASE_URL}/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-    wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip
+RUN wget ${BASE_URL}/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
+    && wget ${BASE_URL}/dcm2niix_lnx.zip \
+    && wget ${BASE_URL}/mango_unix.zip \
+    && wget ${BASE_URL}/MRIcroGL_linux.zip \
+    && wget ${BASE_URL}/MRIcron_linux.zip \
+    && wget ${BASE_URL}/surfice_linux.zip \
+    && wget ${BASE_URL}/vmri.zip \
+    && wget ${BASE_URL}/fsl-6.0.7.14-jammy.tar.gz \
+    && wget ${BASE_URL}/mrtrix3_jammy.zip \
+    && wget ${BASE_URL}/ANTs-jammy.zip \
+    && wget ${BASE_URL}/MATLAB_Runtime_R2024b_glnxa64.zip \
+    && wget ${BASE_URL}/conn22v2407_standalone_jammy_R2024b.zip \
+    && wget ${BASE_URL}/spm12_standalone_jammy_R2024b.zip \
+    && wget ${BASE_URL}/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip
     #wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-
 
 # Main stage
 FROM ubuntu:22.04
@@ -217,90 +216,97 @@ COPY bash_aliases /etc/skel/.bash_aliases
 
 ##### Part 3. Neuroimaging and related Software packages #####
 
-# DCMTK
-# Talairach Daemon
-# VirtualMRI
-# Mango
-# MRIcroGL
-# MRIcron
-# Surf-Ice
-# Octave
-# AlizaMS
-# dcm2niix
-# MRtrix3
-# ANTs
-# MCR
-# SPM12
-# CONN 22v2407
-# NODDI
-# FSL
-RUN apt-get update && apt-get install -y dcmtk && \
-    cp -r ${parts}/tdaemon /usr/local && \
-    cd /usr/local && \
-    unzip /tmp/downloads/vmri.zip && \
-    cd /usr/local && \
-    unzip /tmp/downloads/mango_unix.zip && \
-    cd /usr/local &&  \
-    unzip /tmp/downloads/MRIcroGL_linux.zip && \
-    cd /usr/local && \
-    unzip /tmp/downloads/MRIcron_linux.zip && \
-    cd mricron && \
-    find . -name 'dcm2niix' -exec rm {} \; && \
-    find . -name '*.bat' -exec rm {} \; && \
-    find . -type d -exec chmod 755 {} \; && \
-    find Resources -type f -exec chmod 644 {} \; && \
-    chmod 755 /usr/local/mricron/Resources/pigz_mricron && \
-    cd /usr/local && \
-    unzip /tmp/downloads/surfice_linux.zip && \
-    cd Surf_Ice && \
-    find . -type d -exec chmod 755 {} \; && \
-    find . -type f -exec chmod 644 {} \; && \
-    chmod 755 surfice* && \
-    chmod 644 surfice_Linux_Installation.txt && \
-    apt-get install -y octave && \
-    apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb && \
-    sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop && \
-    cd /usr/local && \
-    mkdir /usr/local/dcm2niix && \
-    unzip /tmp/downloads/dcm2niix_lnx.zip -d /usr/local/dcm2niix && \
-    cd /usr/local && \
-    unzip /tmp/downloads/mrtrix3_jammy.zip && \
-    cd /usr/local && \
-    unzip /tmp/downloads/ANTs-jammy.zip && \
-    cd /tmp/ && \
-    mkdir mcr_r2024b && cd mcr_r2024b && \
-    unzip /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip && \
-    ./install -mode silent -agreeToLicense yes \
-      -destinationFolder /usr/local/MATLAB/MCR/ && \
-    cd /tmp && rm -rf mcr_r2024b && \
-    cd /usr/local && \
-    unzip /tmp/downloads/spm12_standalone_jammy_R2024b.zip && \
-    cd spm12_standalone && \
-    chmod 755 run_spm12.sh spm12 && \
-    cd /usr/local && \
-    unzip /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip && \
-    cd conn22v2407_standalone && \
-    chmod 755 run_conn.sh conn && \
-    cd /usr/local && \
-    unzip /tmp/downloads/NODDI_jammy_R2024b.zip && \
-    cd NODDI && \
-    chmod 755 NODDI run_NODDI.sh && \
-    cd /usr/local/ && \
-    tar -xvf /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz && \
-    sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop
-# RUN cd /tmp && \
-#    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
-#    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
-
-# FreeSurfer 7.4.1
-# Install dependencies
-RUN cd /usr/local && \
-    mkdir freesurfer && cd freesurfer && \
-    apt-get install -y binutils libx11-dev gettext x11-apps \
+RUN set -ex \
+    # Install DCMTK and set up Talairach Daemon
+    && apt-get update && apt-get install -y dcmtk \
+    && cp -r ${parts}/tdaemon /usr/local \
+    \
+    # Install and configure VirtualMRI
+    && cd /usr/local \
+    && unzip /tmp/downloads/vmri.zip \
+    \
+    # Install and configure Mango
+    && cd /usr/local \
+    && unzip /tmp/downloads/mango_unix.zip \
+    \
+    # Install and configure MRIcroGL
+    && cd /usr/local \
+    && unzip /tmp/downloads/MRIcroGL_linux.zip \
+    \
+    # Install and configure MRIcron
+    && cd /usr/local \
+    && unzip /tmp/downloads/MRIcron_linux.zip \
+    && cd mricron \
+    && find . -name 'dcm2niix' -exec rm {} \; \
+    && find . -name '*.bat' -exec rm {} \; \
+    && find . -type d -exec chmod 755 {} \; \
+    && find Resources -type f -exec chmod 644 {} \; \
+    && chmod 755 /usr/local/mricron/Resources/pigz_mricron \
+    \
+    # Install and configure Surf-Ice
+    && cd /usr/local \
+    && unzip /tmp/downloads/surfice_linux.zip \
+    && cd Surf_Ice \
+    && find . -type d -exec chmod 755 {} \; \
+    && find . -type f -exec chmod 644 {} \; \
+    && chmod 755 surfice* \
+    && chmod 644 surfice_Linux_Installation.txt \
+    \
+    # Install Octave and AlizaMS
+    && apt-get install -y octave \
+    && apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
+    && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop \
+    \
+    # Install and configure dcm2niix
+    && cd /usr/local \
+    && mkdir /usr/local/dcm2niix \
+    && unzip /tmp/downloads/dcm2niix_lnx.zip -d /usr/local/dcm2niix \
+    \
+    # Install and configure MRtrix3 and ANTs
+    && cd /usr/local \
+    && unzip /tmp/downloads/mrtrix3_jammy.zip \
+    && unzip /tmp/downloads/ANTs-jammy.zip \
+    \
+    # Install MATLAB Runtime
+    && cd /tmp/ \
+    && mkdir mcr_r2024b && cd mcr_r2024b \
+    && unzip /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip \
+    && ./install -mode silent -agreeToLicense yes -destinationFolder /usr/local/MATLAB/MCR/ \
+    && cd /tmp && rm -rf mcr_r2024b \
+    \
+    # Install and configure SPM12
+    && cd /usr/local \
+    && unzip /tmp/downloads/spm12_standalone_jammy_R2024b.zip \
+    && cd spm12_standalone \
+    && chmod 755 run_spm12.sh spm12 \
+    \
+    # Install and configure CONN
+    && cd /usr/local \
+    && unzip /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip \
+    && cd conn22v2407_standalone \
+    && chmod 755 run_conn.sh conn \
+    \
+    # Install and configure NODDI
+    && cd /usr/local \
+    && unzip /tmp/downloads/NODDI_jammy_R2024b.zip \
+    && cd NODDI \
+    && chmod 755 NODDI run_NODDI.sh \
+    \
+    # Install and configure FSL
+    && cd /usr/local/ \
+    && tar -xvf /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz \
+    && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop \
+    \
+    # Install FreeSurfer 7.4.1
+    && cd /usr/local \
+    && mkdir freesurfer && cd freesurfer \
+    && apt-get install -y binutils libx11-dev gettext x11-apps \
       perl make csh tcsh bash file bc gzip tar \
-      xorg xorg-dev xserver-xorg-video-intel libncurses5 libbsd0 libc6 libc6 \
-      libcom-err2 libcrypt1 libdrm2 libegl1 libexpat1 libffi7 libfontconfig1 \
-      libfreetype6 libgcc-s1 libgl1 libglib2.0-0 libglu1-mesa libglvnd0 libglx0 \
+      xorg xorg-dev xserver-xorg-video-intel \
+      libncurses5 libbsd0 libc6 libc6 \
+      libcom-err2 libcrypt1 libdrm2 libegl1 libexpat1 libffi7 \
+      libfontconfig1 libfreetype6 libgcc-s1 libgl1 libglib2.0-0 \
+      libglu1-mesa libglvnd0 libglx0 \
       libgomp1 libgssapi-krb5-2 libice6 libjpeg62 libk5crypto3 libkeyutils1 \
       libkrb5-3 libkrb5support0 libpcre3 libpng16-16 libquadmath0 libsm6 \
       libstdc++6 libuuid1 libwayland-client0 libwayland-cursor0 libx11-6 \
@@ -309,9 +315,14 @@ RUN cd /usr/local && \
       libxcb-shm0 libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xinerama0 \
       libxcb-xinput0 libxcb-xkb1 libxcb1 libxdmcp6 libxext6 libxft2 libxi6 \
       libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
-      zlib1g && \
-    tar -xvf /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-    mv freesurfer 7.4.1 && \
+      zlib1g \
+    && tar -xvf /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && mv freesurfer 7.4.1
+
+# FSL original script
+# RUN cd /tmp && \
+#    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
+#    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
 
 # fs-scripts
 # kn-scripts
@@ -325,37 +336,36 @@ RUN apt-get clean && \
 ########## End of Part 3 ##########
 
 ########## Part 4. VNC ##########
-# Set up VNC
-# Create a new user
-RUN mkdir -p /root/.vnc && \
-    echo "lin4neuro" | vncpasswd -f > /root/.vnc/passwd && \
-    chmod 600 /root/.vnc/passwd && \
-    useradd -m -s /bin/bash brain && \
-    echo "brain:lin4neuro" | chpasswd && \
-    adduser brain sudo
-
-# SPM settings
-# CONN settings
-# NODDI settings
-RUN chown -R brain:brain /usr/local/spm12_standalone && \
-    cd /usr/local/spm12_standalone && \
-    chmod 755 run_spm12.sh spm12 && \
-    chown -R brain:brain /usr/local/conn22v2407_standalone && \
-    cd /usr/local/conn22v2407_standalone && \
-    chmod 755 run_conn.sh conn && \
-    chown -R brain:brain /usr/local/NODDI && \
-    cd /usr/local/NODDI && \
-    chmod 755 run_NODDI.sh NODDI
-
-# Set up VNC for the new user
-RUN mkdir -p /home/brain/.vnc && \
-    echo "lin4neuro" | vncpasswd -f > /home/brain/.vnc/passwd && \
-    chmod 600 /home/brain/.vnc/passwd && \
-    chown -R brain:brain /home/brain/.vnc
-
-# Create a directory for supervisor logs
-RUN mkdir -p /home/brain/logs && \
-    chown -R brain:brain /home/brain/logs
+# Set up VNC, create a new user, and configure software permissions
+RUN set -ex \
+    # Set up VNC for root
+    && mkdir -p /root/.vnc \
+    && echo "lin4neuro" | vncpasswd -f > /root/.vnc/passwd \
+    && chmod 600 /root/.vnc/passwd \
+    # Create a new user
+    && useradd -m -s /bin/bash brain \
+    && echo "brain:lin4neuro" | chpasswd \
+    && adduser brain sudo \
+    # Set up VNC for the new user
+    && mkdir -p /home/brain/.vnc \
+    && echo "lin4neuro" | vncpasswd -f > /home/brain/.vnc/passwd \
+    && chmod 600 /home/brain/.vnc/passwd \
+    && chown -R brain:brain /home/brain/.vnc \
+    # Create a directory for supervisor logs
+    && mkdir -p /home/brain/logs \
+    && chown -R brain:brain /home/brain/logs \
+    # SPM settings
+    && chown -R brain:brain /usr/local/spm12_standalone \
+    && cd /usr/local/spm12_standalone \
+    && chmod 755 run_spm12.sh spm12 \
+    # CONN settings
+    && chown -R brain:brain /usr/local/conn22v2407_standalone \
+    && cd /usr/local/conn22v2407_standalone \
+    && chmod 755 run_conn.sh conn \
+    # NODDI settings
+    && chown -R brain:brain /usr/local/NODDI \
+    && cd /usr/local/NODDI \
+    && chmod 755 run_NODDI.sh NODDI
 
 # Copy supervisord configuration
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
