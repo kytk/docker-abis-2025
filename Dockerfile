@@ -16,9 +16,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Copy binary files from Download stage
-COPY --from=downloader /downloads /tmp/downloads 
-
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
 RUN apt-get update && apt-get install -y \
@@ -234,7 +231,8 @@ RUN set -ex \
     \
     # Install Octave and AlizaMS
     && apt-get install -y octave \
-    && /tmp/downloads \
+    && mkdir -p /tmp/downloads \
+    && cd /tmp/downloads \
     && wget ${BASE_URL}/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
     && apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
     && rm  /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
