@@ -2,37 +2,6 @@
 ## This file makes a container image of docker-abis-2025
 ## K. Nemoto 12 Oct 2024
 
-# Download stage
-FROM ubuntu:22.04 AS downloader
-
-# wget
-RUN apt-get update && apt-get install -y wget && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Set base URL as an environment variable
-ENV BASE_URL="http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages"
-
-# Download binary files
-WORKDIR /downloads
-RUN wget ${BASE_URL}/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
-    && wget ${BASE_URL}/dcm2niix_lnx.zip \
-    && wget ${BASE_URL}/mango_unix.zip \
-    && wget ${BASE_URL}/MRIcroGL_linux.zip \
-    && wget ${BASE_URL}/MRIcron_linux.zip \
-    && wget ${BASE_URL}/surfice_linux.zip \
-    && wget ${BASE_URL}/vmri.zip \
-    && wget ${BASE_URL}/fsl-6.0.7.14-jammy.tar.gz \
-    && wget ${BASE_URL}/mrtrix3_jammy.zip \
-    && wget ${BASE_URL}/ANTs-jammy.zip \
-    && wget ${BASE_URL}/MATLAB_Runtime_R2024b_glnxa64.zip \
-    && wget ${BASE_URL}/conn22v2407_standalone_jammy_R2024b.zip \
-    && wget ${BASE_URL}/spm12_standalone_jammy_R2024b.zip \
-    && wget ${BASE_URL}/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
-    && wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip
-    #wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz && \
-
-# Main stage
 FROM ubuntu:22.04
 
 # Environmental variables
@@ -41,7 +10,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     RESOLUTION=1600x900x24 \
     DISPLAY=:1 \
     USER=brain \
-    parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts
+    parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts \
+    BASE_URL="http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages"
 
 # Timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -223,23 +193,27 @@ RUN set -ex \
     \
     # Install and configure VirtualMRI
     && cd /usr/local \
-    && unzip /tmp/downloads/vmri.zip \
-    && rm /tmp/downloads/vmri.zip \
+    && wget ${BASE_URL}/vmri.zip \
+    && unzip vmri.zip \
+    && rm vmri.zip \
     \
     # Install and configure Mango
     && cd /usr/local \
-    && unzip /tmp/downloads/mango_unix.zip \
-    && rm /tmp/downloads/mango_unix.zip \
+    && wget ${BASE_URL}/mango_unix.zip \
+    && unzip mango_unix.zip \
+    && rm mango_unix.zip \
     \
     # Install and configure MRIcroGL
     && cd /usr/local \
-    && unzip /tmp/downloads/MRIcroGL_linux.zip \
-    && rm /tmp/downloads/MRIcroGL_linux.zip \
+    && wget ${BASE_URL}/MRIcroGL_linux.zip \
+    && unzip MRIcroGL_linux.zip \
+    && rm MRIcroGL_linux.zip \
     \
     # Install and configure MRIcron
     && cd /usr/local \
-    && unzip /tmp/downloads/MRIcron_linux.zip \
-    && rm /tmp/downloads/MRIcron_linux.zip \
+    && wget ${BASE_URL}/MRIcron_linux.zip \
+    && unzip MRIcron_linux.zip \
+    && rm MRIcron_linux.zip \
     && cd mricron \
     && find . -name 'dcm2niix' -exec rm {} \; \
     && find . -name '*.bat' -exec rm {} \; \
@@ -249,8 +223,9 @@ RUN set -ex \
     \
     # Install and configure Surf-Ice
     && cd /usr/local \
-    && unzip /tmp/downloads/surfice_linux.zip \
-    && rm /tmp/downloads/surfice_linux.zip \
+    && wget ${BASE_URL}/surfice_linux.zip \
+    && unzip surfice_linux.zip \
+    && rm surfice_linux.zip \
     && cd Surf_Ice \
     && find . -type d -exec chmod 755 {} \; \
     && find . -type f -exec chmod 644 {} \; \
@@ -259,6 +234,8 @@ RUN set -ex \
     \
     # Install Octave and AlizaMS
     && apt-get install -y octave \
+    && /tmp/downloads \
+    && wget ${BASE_URL}/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
     && apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
     && rm  /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
     && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop \
@@ -266,51 +243,60 @@ RUN set -ex \
     # Install and configure dcm2niix
     && cd /usr/local \
     && mkdir /usr/local/dcm2niix \
+    && cd /tmp/downloads \
+    && wget ${BASE_URL}/dcm2niix_lnx.zip \
     && unzip /tmp/downloads/dcm2niix_lnx.zip -d /usr/local/dcm2niix \
     && rm /tmp/downloads/dcm2niix_lnx.zip \
     \
     # Install and configure MRtrix3 and ANTs
     && cd /usr/local \
-    && unzip /tmp/downloads/mrtrix3_jammy.zip \
-    && rm /tmp/downloads/mrtrix3_jammy.zip \
-    && unzip /tmp/downloads/ANTs-jammy.zip \
-    && rm /tmp/downloads/ANTs-jammy.zip 
+    && wget ${BASE_URL}/mrtrix3_jammy.zip \
+    && unzip mrtrix3_jammy.zip \
+    && rm mrtrix3_jammy.zip \
+    && wget ${BASE_URL}/ANTs-jammy.zip \
+    && unzip ANTs-jammy.zip \
+    && rm ANTs-jammy.zip 
 
 RUN set -ex \
     # Install MATLAB Runtime
     && cd /tmp/ \
     && mkdir mcr_r2024b && cd mcr_r2024b \
-    && unzip /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip \
-    && rm /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip \
+    && wget ${BASE_URL}/MATLAB_Runtime_R2024b_glnxa64.zip \
+    && unzip MATLAB_Runtime_R2024b_glnxa64.zip \
+    && rm MATLAB_Runtime_R2024b_glnxa64.zip \
     && ./install -mode silent -agreeToLicense yes -destinationFolder /usr/local/MATLAB/MCR/ \
     && cd /tmp && rm -rf mcr_r2024b \
     \
     # Install and configure SPM12
     && cd /usr/local \
-    && unzip /tmp/downloads/spm12_standalone_jammy_R2024b.zip \
-    && rm /tmp/downloads/spm12_standalone_jammy_R2024b.zip \
+    && wget ${BASE_URL}/spm12_standalone_jammy_R2024b.zip \
+    && unzip spm12_standalone_jammy_R2024b.zip \
+    && rm spm12_standalone_jammy_R2024b.zip \
     && cd spm12_standalone \
     && chmod 755 run_spm12.sh spm12 \
     \
     # Install and configure CONN
     && cd /usr/local \
-    && unzip /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip \
-    && rm /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip \
+    && wget ${BASE_URL}/conn22v2407_standalone_jammy_R2024b.zip \
+    && unzip conn22v2407_standalone_jammy_R2024b.zip \
+    && rm conn22v2407_standalone_jammy_R2024b.zip \
     && cd conn22v2407_standalone \
     && chmod 755 run_conn.sh conn \
     \
     # Install and configure NODDI
     && cd /usr/local \
-    && unzip /tmp/downloads/NODDI_jammy_R2024b.zip \
-    && rm /tmp/downloads/NODDI_jammy_R2024b.zip \
+    && wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip
+    && unzip NODDI_jammy_R2024b.zip \
+    && rm NODDI_jammy_R2024b.zip \
     && cd NODDI \
     && chmod 755 NODDI run_NODDI.sh
 
 RUN set -ex \
     # Install and configure FSL
     && cd /usr/local/ \
-    && tar -xvf /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz \
-    && rm /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz \
+    && wget ${BASE_URL}/fsl-6.0.7.14-jammy.tar.gz \
+    && tar -xvf fsl-6.0.7.14-jammy.tar.gz \
+    && rm fsl-6.0.7.14-jammy.tar.gz \
     && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop
 
 # FSL original script
@@ -338,8 +324,10 @@ RUN set -ex \
       libxcb-xinput0 libxcb-xkb1 libxcb1 libxdmcp6 libxext6 libxft2 libxi6 \
       libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
       zlib1g \
-    && tar -xvf /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
-    && rm /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && wget ${BASE_URL}/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    # && wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && tar -xvf freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && rm freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     && mv freesurfer 7.4.1
 
 # fs-scripts and kn-scripts
@@ -349,7 +337,7 @@ RUN cd /etc/skel/git && \
 
 # clean-up apt and /tmp/downloads
 RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /downloads
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 ########## End of Part 3 ##########
 
 ########## Part 4. VNC ##########
