@@ -285,7 +285,7 @@ RUN set -ex \
     \
     # Install and configure NODDI
     && cd /usr/local \
-    && wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip
+    && wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip \
     && unzip NODDI_jammy_R2024b.zip \
     && rm NODDI_jammy_R2024b.zip \
     && cd NODDI \
