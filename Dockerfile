@@ -274,8 +274,9 @@ RUN set -ex \
     && unzip /tmp/downloads/mrtrix3_jammy.zip \
     && rm /tmp/downloads/mrtrix3_jammy.zip \
     && unzip /tmp/downloads/ANTs-jammy.zip \
-    && rm /tmp/downloads/ANTs-jammy.zip \
-    \
+    && rm /tmp/downloads/ANTs-jammy.zip 
+
+RUN set -ex \
     # Install MATLAB Runtime
     && cd /tmp/ \
     && mkdir mcr_r2024b && cd mcr_r2024b \
@@ -303,14 +304,21 @@ RUN set -ex \
     && unzip /tmp/downloads/NODDI_jammy_R2024b.zip \
     && rm /tmp/downloads/NODDI_jammy_R2024b.zip \
     && cd NODDI \
-    && chmod 755 NODDI run_NODDI.sh \
-    \
+    && chmod 755 NODDI run_NODDI.sh
+
+RUN set -ex \
     # Install and configure FSL
     && cd /usr/local/ \
     && tar -xvf /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz \
     && rm /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz \
-    && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop \
-    \
+    && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop
+
+# FSL original script
+# RUN cd /tmp && \
+#    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
+#    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
+
+RUN set -ex \
     # Install FreeSurfer 7.4.1
     && cd /usr/local \
     && mkdir freesurfer && cd freesurfer \
@@ -334,20 +342,14 @@ RUN set -ex \
     && rm /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     && mv freesurfer 7.4.1
 
-# FSL original script
-# RUN cd /tmp && \
-#    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py && \
-#    /usr/bin/python3 fslinstaller.py -d /usr/local/fsl && \
-
-# fs-scripts
-# kn-scripts
+# fs-scripts and kn-scripts
 RUN cd /etc/skel/git && \
     git clone https://gitlab.com/kytk/fs-scripts.git && \
     git clone https://gitlab.com/kytk/kn-scripts.git 
 
 # clean-up apt and /tmp/downloads
 RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /downloads
 ########## End of Part 3 ##########
 
 ########## Part 4. VNC ##########
