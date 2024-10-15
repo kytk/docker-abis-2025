@@ -224,18 +224,22 @@ RUN set -ex \
     # Install and configure VirtualMRI
     && cd /usr/local \
     && unzip /tmp/downloads/vmri.zip \
+    && rm /tmp/downloads/vmri.zip \
     \
     # Install and configure Mango
     && cd /usr/local \
     && unzip /tmp/downloads/mango_unix.zip \
+    && rm /tmp/downloads/mango_unix.zip \
     \
     # Install and configure MRIcroGL
     && cd /usr/local \
     && unzip /tmp/downloads/MRIcroGL_linux.zip \
+    && rm /tmp/downloads/MRIcroGL_linux.zip \
     \
     # Install and configure MRIcron
     && cd /usr/local \
     && unzip /tmp/downloads/MRIcron_linux.zip \
+    && rm /tmp/downloads/MRIcron_linux.zip \
     && cd mricron \
     && find . -name 'dcm2niix' -exec rm {} \; \
     && find . -name '*.bat' -exec rm {} \; \
@@ -246,6 +250,7 @@ RUN set -ex \
     # Install and configure Surf-Ice
     && cd /usr/local \
     && unzip /tmp/downloads/surfice_linux.zip \
+    && rm /tmp/downloads/surfice_linux.zip \
     && cd Surf_Ice \
     && find . -type d -exec chmod 755 {} \; \
     && find . -type f -exec chmod 644 {} \; \
@@ -255,46 +260,55 @@ RUN set -ex \
     # Install Octave and AlizaMS
     && apt-get install -y octave \
     && apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
+    && rm  /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
     && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop \
     \
     # Install and configure dcm2niix
     && cd /usr/local \
     && mkdir /usr/local/dcm2niix \
     && unzip /tmp/downloads/dcm2niix_lnx.zip -d /usr/local/dcm2niix \
+    && rm /tmp/downloads/dcm2niix_lnx.zip \
     \
     # Install and configure MRtrix3 and ANTs
     && cd /usr/local \
     && unzip /tmp/downloads/mrtrix3_jammy.zip \
+    && rm /tmp/downloads/mrtrix3_jammy.zip \
     && unzip /tmp/downloads/ANTs-jammy.zip \
+    && rm /tmp/downloads/ANTs-jammy.zip \
     \
     # Install MATLAB Runtime
     && cd /tmp/ \
     && mkdir mcr_r2024b && cd mcr_r2024b \
     && unzip /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip \
+    && rm /tmp/downloads/MATLAB_Runtime_R2024b_glnxa64.zip \
     && ./install -mode silent -agreeToLicense yes -destinationFolder /usr/local/MATLAB/MCR/ \
     && cd /tmp && rm -rf mcr_r2024b \
     \
     # Install and configure SPM12
     && cd /usr/local \
     && unzip /tmp/downloads/spm12_standalone_jammy_R2024b.zip \
+    && rm /tmp/downloads/spm12_standalone_jammy_R2024b.zip \
     && cd spm12_standalone \
     && chmod 755 run_spm12.sh spm12 \
     \
     # Install and configure CONN
     && cd /usr/local \
     && unzip /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip \
+    && rm /tmp/downloads/conn22v2407_standalone_jammy_R2024b.zip \
     && cd conn22v2407_standalone \
     && chmod 755 run_conn.sh conn \
     \
     # Install and configure NODDI
     && cd /usr/local \
     && unzip /tmp/downloads/NODDI_jammy_R2024b.zip \
+    && rm /tmp/downloads/NODDI_jammy_R2024b.zip \
     && cd NODDI \
     && chmod 755 NODDI run_NODDI.sh \
     \
     # Install and configure FSL
     && cd /usr/local/ \
     && tar -xvf /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz \
+    && rm /tmp/downloads/fsl-6.0.7.14-jammy.tar.gz \
     && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop \
     \
     # Install FreeSurfer 7.4.1
@@ -317,6 +331,7 @@ RUN set -ex \
       libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
       zlib1g \
     && tar -xvf /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && rm /tmp/downloads/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     && mv freesurfer 7.4.1
 
 # FSL original script
