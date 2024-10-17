@@ -18,112 +18,105 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    xfce4 \
-    xfce4-terminal \
-    xfce4-indicator-plugin  \
-#    xfce4-clipman \
-#    xfce4-clipman-plugin \
-    xfce4-statusnotifier-plugin  \
-#    xfce4-power-manager-plugins \
-    xfce4-screenshooter \
-    elementary-xfce-icon-theme \
-    gnome-icon-theme \
-    librsvg2-common \
-    gtk-update-icon-cache \
-    tango-icon-theme \
-    yaru-theme-icon \
-#    lightdm \
-#    lightdm-gtk-greeter \
-#    lightdm-gtk-greeter-settings \
-    shimmer-themes \
-#    network-manager-gnome \
-    xinit \
-#    build-essential  \
-    dkms \
-    thunar-archive-plugin \
-    file-roller \
-    gawk \
-    xdg-utils \
-    tightvncserver \
-    novnc \
-    websockify \
-    net-tools \
-    supervisor \
-    x11vnc \
-    xvfb \
-    dbus-x11 \
-    sudo \
-    python3-pip \
-    python3-venv \
-    python3-dev \
-    python3-tk \
-    python3-gpg && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN set -ex \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+       xfce4 \
+       xfce4-terminal \
+       xfce4-indicator-plugin  \
+#       xfce4-clipman \
+#       xfce4-clipman-plugin \
+       xfce4-statusnotifier-plugin  \
+#       xfce4-power-manager-plugins \
+       xfce4-screenshooter \
+       elementary-xfce-icon-theme \
+       gnome-icon-theme \
+       librsvg2-common \
+       gtk-update-icon-cache \
+       tango-icon-theme \
+       yaru-theme-icon \
+#       lightdm \
+#       lightdm-gtk-greeter \
+#       lightdm-gtk-greeter-settings \
+       shimmer-themes \
+#       network-manager-gnome \
+       xinit \
+       build-essential  \
+       dkms \
+       thunar-archive-plugin \
+       file-roller \
+       gawk \
+       xdg-utils \
+       tightvncserver \
+       novnc \
+       websockify \
+       net-tools \
+       supervisor \
+       x11vnc \
+       xvfb \
+       dbus-x11 \
+       sudo \
+       python3-pip \
+       python3-venv \
+       python3-dev \
+       python3-tk \
+       python3-gpg \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Python
-RUN python3 -m pip install --upgrade pip && \
-    pip install --no-cache-dir numpy pandas pydicom gdcm dcm2bids \
-    heudiconv nipype nibabel jupyter notebook \
-    bash_kernel octave_kernel && \
-    python3 -m bash_kernel.install
+RUN set -ex \
+    && python3 -m pip install --upgrade pip \
+    && pip install --no-cache-dir numpy pandas pydicom gdcm dcm2bids \
+       heudiconv nipype nibabel jupyter notebook \
+       bash_kernel octave_kernel \
+    && python3 -m bash_kernel.install
 
 # Install utilities
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    apt-utils \
-    at-spi2-core \
-    bc \
-#    byobu \
-    curl \
-    wget \
-    dc \
-    default-jre \
-    evince \
-#    exfatprogs \
-    gedit \
-    gnome-system-monitor \
-    gnome-system-tools \
-#    gparted \
-    imagemagick \
-    rename \
-    ntp \
-#    system-config-printer \
-    tree \
-    unzip \
-    vim  \
-    zip \
-    tcsh \
-    baobab \
-#    bleachbit \
-    libopenblas-base \
-#    cups \
-    apturl \
-    dmz-cursor-theme \
-#    chntpw \
-#    gddrescue \
-    p7zip-full \
-    gnupg \
-    eog \
-    meld \
-    libjpeg62 \
-    software-properties-common \
-    fonts-noto \
-    fonts-noto-cjk \
-    fonts-noto-cjk-extra \
-#    mupdf \
-#    mupdf-tools \
-    pigz \
-#    ristretto \
-#    pinta \
-#    libreoffice
-    gnumeric \
+RUN set -ex \
+    &&  apt-get update \
+    && apt-get install -y --no-install-recommends \
+       git \
+       apt-utils \
+       at-spi2-core \
+       bc \
+       curl \
+       wget \
+       dc \
+       default-jre \
+       evince \
+       gedit \
+       gnome-system-monitor \
+       gnome-system-tools \
+       imagemagick \
+       rename \
+       ntp \
+       tree \
+       unzip \
+       vim  \
+       zip \
+       tcsh \
+       baobab \
+       libopenblas-base \
+       apturl \
+       dmz-cursor-theme \
+       p7zip-full \
+       gnupg \
+       eog \
+       meld \
+       libjpeg62 \
+       software-properties-common \
+       fonts-noto \
+       fonts-noto-cjk \
+       fonts-noto-cjk-extra \
+       pigz \
+       gnumeric \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Firefox
-RUN install -d -m 0755 /etc/apt/keyrings \
+RUN set -ex \
+    && install -d -m 0755 /etc/apt/keyrings \
     && wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- |\
        tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null \
@@ -136,16 +129,20 @@ Pin-Priority: 1000\n\
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-
 ## Japanese environment
-RUN apt-get update \
+RUN set -ex \
+    && apt-get update \
     && apt-get install -y \
        locales \
        fcitx-mozc \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && locale-gen ja_JP.UTF-8 \
-    && echo "export LANG=ja_JP.UTF-8" >> ~/.bashrc
+    && locale-gen ja_JP.UTF-8
+
+ENV LANG=ja_JP.UTF-8 \
+    GTK_IM_MODULE=fcitx \
+    QT_IM_MODULE=fcitx \
+    XMODIFIERS=@im=fcitx
 
 ## Install Google-chrome
 #RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
@@ -155,34 +152,33 @@ RUN apt-get update \
 ########## End of Part 1 ##########
 
 ########## Part 2. Lin4Neuro ##########
-RUN mkdir /etc/skel/git && cd /etc/skel/git && \
-    git clone https://gitlab.com/kytk/lin4neuro-jammy.git && \
+RUN set -ex \
+    && mkdir /etc/skel/git && cd /etc/skel/git \
+    && git clone https://gitlab.com/kytk/lin4neuro-jammy.git \
     # Icons and Applications
-    mkdir -p /etc/skel/.local/share && \ 
-    cp -r ${parts}/local/share/icons /etc/skel/.local/share/ && \
-    cp -r ${parts}/local/share/applications /etc/skel/.local/share/ && \
+    && mkdir -p /etc/skel/.local/share \ 
+    && cp -r ${parts}/local/share/icons /etc/skel/.local/share/ \
+    && cp -r ${parts}/local/share/applications /etc/skel/.local/share/ \
     # Customized menu
-    mkdir -p /etc/skel/.config/menus && \
-    cp ${parts}/config/menus/xfce-applications.menu /etc/skel/.config/menus && \
+    && mkdir -p /etc/skel/.config/menus \
+    && cp ${parts}/config/menus/xfce-applications.menu /etc/skel/.config/menus \
     # Customized panel, desktop, and theme
-    cp -r ${parts}/config/xfce4 /etc/skel/.config/ && \
-    cp /usr/share/applications/firefox.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
-    rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop && \
-    rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop && \
+    && cp -r ${parts}/config/xfce4 /etc/skel/.config/ \
+    && cp /usr/share/applications/firefox.desktop \
+          /etc/skel/.config/xfce4/panel/launcher-6/ \
+    && rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop \
+    && rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop \
     # Desktop files
-    cp -r ${parts}/local/share/applications /etc/skel/.local/share/ && \
+    && cp -r ${parts}/local/share/applications /etc/skel/.local/share/ \
     # Neuroimaging.directory
-    mkdir -p /etc/skel/.local/share/desktop-directories && \
-    cp ${parts}/local/share/desktop-directories/Neuroimaging.directory \
-       /etc/skel/.local/share/desktop-directories && \
+    && mkdir -p /etc/skel/.local/share/desktop-directories \
+    && cp ${parts}/local/share/desktop-directories/Neuroimaging.directory \
+       /etc/skel/.local/share/desktop-directories \
     # Background image and remove an unnecessary image file
-    cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds && \
-    rm /usr/share/backgrounds/xfce/xfce-*.*p*g
+    && cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds \
+    && rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 
 COPY xfce4-panel.xml xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
-
-# Clean packages
-RUN apt-get -y autoremove
 
 # .bash_aliases
 COPY bash_aliases /etc/skel/.bash_aliases
@@ -261,7 +257,9 @@ RUN set -ex \
     && rm mrtrix3_jammy.zip \
     && wget ${BASE_URL}/ANTs-jammy.zip \
     && unzip ANTs-jammy.zip \
-    && rm ANTs-jammy.zip 
+    && rm ANTs-jammy.zip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* 
 
 RUN set -ex \
     # Install MATLAB Runtime
@@ -303,7 +301,8 @@ RUN set -ex \
     && wget ${BASE_URL}/fsl-6.0.7.14-jammy.tar.gz \
     && tar -xvf fsl-6.0.7.14-jammy.tar.gz \
     && rm fsl-6.0.7.14-jammy.tar.gz \
-    && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/fsleyes.desktop
+    && sed -i 's/NoDisplay=true/NoDisplay=false/' \
+              /etc/skel/.local/share/applications/fsleyes.desktop
 
 # FSL original script
 # RUN cd /tmp && \
@@ -331,6 +330,8 @@ RUN set -ex \
       libxcb-xinput0 libxcb-xkb1 libxcb1 libxdmcp6 libxext6 libxft2 libxi6 \
       libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
       zlib1g \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
     && wget ${BASE_URL}/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     # && wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     && tar -xvf freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
@@ -338,11 +339,12 @@ RUN set -ex \
     && mv freesurfer 7.4.1
 
 # fs-scripts and kn-scripts
-RUN cd /etc/skel/git && \
-    git clone https://gitlab.com/kytk/fs-scripts.git && \
-    git clone https://gitlab.com/kytk/kn-scripts.git 
+RUN set -ex \
+    && cd /etc/skel/git \
+    && git clone https://gitlab.com/kytk/fs-scripts.git \
+    && git clone https://gitlab.com/kytk/kn-scripts.git 
 
-# clean-up apt and /tmp/downloads
+# clean-up 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 ########## End of Part 3 ##########
