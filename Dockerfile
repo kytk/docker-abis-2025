@@ -64,7 +64,7 @@ RUN python3 -m pip install --upgrade pip && \
     python3 -m bash_kernel.install
 
 # Install utilities
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     apt-utils \
     at-spi2-core \
@@ -318,7 +318,8 @@ RUN set -ex \
     # Install FreeSurfer 7.4.1
     && cd /usr/local \
     && mkdir freesurfer && cd freesurfer \
-    && apt-get install -y binutils libx11-dev gettext x11-apps \
+    && apt-get install -y --no-install-recommends \
+      binutils libx11-dev gettext x11-apps \
       perl make csh tcsh bash file bc gzip tar \
       xorg xorg-dev xserver-xorg-video-intel \
       libncurses5 libbsd0 libc6 libc6 \
