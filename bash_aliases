@@ -58,4 +58,9 @@ PATH=${FSLDIR}/share/fsl/bin:${PATH}
 export FSLDIR PATH
 . ${FSLDIR}/etc/fslconf/fsl.sh
 
+# fs-scripts 
+PATH=$PATH:~/git/fs-scripts
+
+# kn-scripts 
+PATH=$PATH:~/git/kn-scripts
 

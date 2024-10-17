@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xfce4-statusnotifier-plugin  \
 #    xfce4-power-manager-plugins \
     xfce4-screenshooter \
+    elementary-xfce-icon-theme \
 #    lightdm \
 #    lightdm-gtk-greeter \
 #    lightdm-gtk-greeter-settings \
@@ -124,7 +125,7 @@ Package: *\n\
 Pin: origin packages.mozilla.org\n\
 Pin-Priority: 1000\n\
 ' | tee /etc/apt/preferences.d/mozilla \
-    && apt-get update && sudo apt-get install firefox
+    && apt-get update && sudo apt-get install -y firefox
 
 
 ## Japanese environment
@@ -161,7 +162,7 @@ RUN mkdir /etc/skel/git && cd /etc/skel/git && \
     cp ${parts}/config/menus/xfce-applications.menu /etc/skel/.config/menus && \
     # Customized panel, desktop, and theme
     cp -r ${parts}/config/xfce4 /etc/skel/.config/ && \
-    cp /usr/share/applications/org.gnome.Epiphany.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
+    cp /usr/share/applications/firefox.desktop /etc/skel/.config/xfce4/panel/launcher-6/ && \
     rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop && \
     rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop && \
     # Desktop files
@@ -395,6 +396,9 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 # Switch to the new user
 USER brain
+
+# prepare shared directory
+RUN mkdir ~/share
 
 # Prepare FreeSurfer
 RUN mkdir -p ~/freesurfer/7.4.1 && \
