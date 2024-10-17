@@ -18,7 +18,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     xfce4 \
     xfce4-terminal \
     xfce4-indicator-plugin  \
@@ -110,10 +110,22 @@ RUN apt-get update && apt-get install -y \
 #    ristretto \
 #    pinta \
 #    libreoffice
-    gnumeric \
-    epiphany-browser  && \
+    gnumeric && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Firefox
+RUN install -d -m 0755 /etc/apt/keyrings \
+    && wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- |\
+       tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null \
+    && echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null \
+    && echo '\n\
+Package: *\n\
+Pin: origin packages.mozilla.org\n\
+Pin-Priority: 1000\n\
+' | tee /etc/apt/preferences.d/mozilla \
+    && apt-get update && sudo apt-get install firefox
+
 
 ## Japanese environment
 #RUN apt-get install -y \

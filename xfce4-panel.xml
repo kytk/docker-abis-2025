@@ -46,7 +46,7 @@
     </property>
     <property name="plugin-6" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="org.gnome.Epiphany.desktop"/>
+        <value type="string" value="firefox.desktop"/>
       </property>
     </property>
     <property name="plugin-9" type="string" value="pulseaudio">
