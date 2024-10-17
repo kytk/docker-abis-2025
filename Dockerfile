@@ -28,6 +28,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 #    xfce4-power-manager-plugins \
     xfce4-screenshooter \
     elementary-xfce-icon-theme \
+    gnome-icon-theme \
+    librsvg2-common \
+    gtk-update-icon-cache \
+    tango-icon-theme \
+    yaru-theme-icon \
 #    lightdm \
 #    lightdm-gtk-greeter \
 #    lightdm-gtk-greeter-settings \
@@ -105,15 +110,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg62 \
     software-properties-common \
     fonts-noto \
+    fonts-noto-cjk \
+    fonts-noto-cjk-extra \
 #    mupdf \
 #    mupdf-tools \
     pigz \
 #    ristretto \
 #    pinta \
 #    libreoffice
-    gnumeric && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    gnumeric \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Firefox
 RUN install -d -m 0755 /etc/apt/keyrings \
@@ -125,28 +132,25 @@ Package: *\n\
 Pin: origin packages.mozilla.org\n\
 Pin-Priority: 1000\n\
 ' | tee /etc/apt/preferences.d/mozilla \
-    && apt-get update && sudo apt-get install -y firefox
+    && apt-get update && sudo apt-get install -y firefox \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 
 ## Japanese environment
-#RUN apt-get install -y \
-#    language-pack-ja-base \
-#    language-pack-ja \
-#    fcitx-mozc 
-#
-#ENV LANG=ja_JP.UTF-8 \
-#    LANGUAGE=ja_JP:ja \
-#    LC_ALL=ja_JP.UTF-8
-#
-#RUN update-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja" LC_ALL=ja_JP.UTF-8 
-
-# Remove xfce4-screensaver
-#RUN apt-get purge -y xfce4-screensaver
+RUN apt-get update \
+    && apt-get install -y \
+       locales \
+       fcitx-mozc \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && locale-gen ja_JP.UTF-8 \
+    && echo "export LANG=ja_JP.UTF-8" >> ~/.bashrc
 
 ## Install Google-chrome
-#RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-#RUN apt install -y ./google-chrome-stable_current_amd64.deb
-#RUN rm google-chrome-stable_current_amd64.deb
+#RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+# && apt install -y ./google-chrome-stable_current_amd64.deb \
+# && rm google-chrome-stable_current_amd64.deb
 
 ########## End of Part 1 ##########
 
@@ -176,15 +180,6 @@ RUN mkdir /etc/skel/git && cd /etc/skel/git && \
     rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 
 COPY xfce4-panel.xml xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
-
-## Modified lightdm-gtk-greeter.conf
-#RUN mkdir -p /usr/share/lightdm/lightdm-gtk-greeter.conf.d && \
-#    cp ${parts}/lightdm/lightdm-gtk-greeter.conf.d/01_ubuntu.conf /usr/share/lightdm/lightdm-gtk-greeter.conf.d
-
-## Auto-login
-#RUN mkdir -p /usr/share/lightdm/lightdm.conf.d && \
-#    cp ${parts}/lightdm/lightdm.conf.d/10-ubuntu.conf \
-# /usr/share/lightdm/lightdm.conf.d
 
 # Clean packages
 RUN apt-get -y autoremove
