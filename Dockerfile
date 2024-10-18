@@ -36,6 +36,7 @@ RUN set -ex \
        thunar-archive-plugin \
        file-roller \
        gawk \
+       sed \
        xdg-utils \
        tightvncserver \
        novnc \
@@ -73,6 +74,11 @@ RUN set -ex \
 RUN set -ex \
     &&  apt-get update \
     && apt-get install -y --no-install-recommends \
+       less \
+       ping \
+       nano \
+       rsync \
+       locate \
        git \
        apt-utils \
        at-spi2-core \
