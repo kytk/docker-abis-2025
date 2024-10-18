@@ -316,6 +316,7 @@ RUN set -ex \
     # Install FreeSurfer 7.4.1
     && cd /usr/local \
     && mkdir freesurfer && cd freesurfer \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
       binutils libx11-dev gettext x11-apps \
       perl make csh tcsh bash file bc gzip tar \
