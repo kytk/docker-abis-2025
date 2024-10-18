@@ -111,6 +111,9 @@ RUN set -ex \
        fonts-noto-cjk-extra \
        pigz \
        gnumeric \
+       appmenu-gtk-module-common \
+       appmenu-gtk2-module \
+       libappmenu-gtk2-parser0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
