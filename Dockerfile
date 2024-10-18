@@ -6,15 +6,12 @@ FROM ubuntu:22.04
 
 # Environmental variables
 ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=UTC \
+    TZ=Asia/Tokyo \
     RESOLUTION=1600x900x24 \
     DISPLAY=:1 \
     USER=brain \
     parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts \
     BASE_URL="http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages"
-
-# Timezone
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
@@ -24,10 +21,7 @@ RUN set -ex \
        xfce4 \
        xfce4-terminal \
        xfce4-indicator-plugin  \
-#       xfce4-clipman \
-#       xfce4-clipman-plugin \
        xfce4-statusnotifier-plugin  \
-#       xfce4-power-manager-plugins \
        xfce4-screenshooter \
        elementary-xfce-icon-theme \
        gnome-icon-theme \
@@ -35,11 +29,7 @@ RUN set -ex \
        gtk-update-icon-cache \
        tango-icon-theme \
        yaru-theme-icon \
-#       lightdm \
-#       lightdm-gtk-greeter \
-#       lightdm-gtk-greeter-settings \
        shimmer-themes \
-#       network-manager-gnome \
        xinit \
        build-essential  \
        dkms \
@@ -61,8 +51,15 @@ RUN set -ex \
        python3-dev \
        python3-tk \
        python3-gpg \
+       tzdata \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Timezone
+RUN set -ex \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    && dpkg-reconfigure -f noninteractive tzdata
 
 # Python
 RUN set -ex \
@@ -140,7 +137,17 @@ RUN set -ex \
        fcitx-mozc \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && locale-gen ja_JP.UTF-8
+    && locale-gen ja_JP.UTF-8 \
+    && mkdir -p /etc/skel/.config/autostart \
+    && echo '#!/bin/sh\nfcitx -d' > /etc/skel/.config/autostart/fcitx-autostart.sh \
+    && chmod +x /etc/skel/.config/autostart/fcitx-autostart.sh \
+    && echo "[Desktop Entry]\n\
+Type=Application\n\
+Name=fcitx\n\
+Exec=/etc/skel/.config/autostart/fcitx-autostart.sh\n\
+StartupNotify=false\n\
+Terminal=false\n\
+Hidden=false" > /etc/skel/.config/autostart/fcitx.desktop
 
 ENV LANG=ja_JP.UTF-8 \
     GTK_IM_MODULE=fcitx \
@@ -181,7 +188,8 @@ RUN set -ex \
     && cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds \
     && rm /usr/share/backgrounds/xfce/xfce-*.*p*g
 
-COPY xfce4-panel.xml xfce4-desktop.xml /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
+COPY xfce4-panel.xml xfce4-desktop.xml \
+     /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
 
 # .bash_aliases
 COPY bash_aliases /etc/skel/.bash_aliases
@@ -243,7 +251,8 @@ RUN set -ex \
     && wget ${BASE_URL}/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
     && apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
     && rm  /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
-    && sed -i 's/NoDisplay=true/NoDisplay=false/' /etc/skel/.local/share/applications/alizams.desktop \
+    && sed -i 's/NoDisplay=true/NoDisplay=false/' \
+              /etc/skel/.local/share/applications/alizams.desktop \
     \
     # Install and configure dcm2niix
     && cd /usr/local \
@@ -402,8 +411,9 @@ USER brain
 RUN mkdir ~/share
 
 # Prepare FreeSurfer
-RUN mkdir -p ~/freesurfer/7.4.1 && \
-cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
+RUN set -ex \
+    && mkdir -p ~/freesurfer/7.4.1 \
+    && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
 
 # Entrypoint
 COPY --chown=brain:brain docker-entrypoint.sh /usr/local/bin/
