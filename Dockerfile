@@ -75,7 +75,7 @@ RUN set -ex \
     &&  apt-get update \
     && apt-get install -y --no-install-recommends \
        less \
-       ping \
+       iputils-ping \
        nano \
        rsync \
        locate \
