@@ -8,9 +8,10 @@ Lin4Neuro環境を起動するには：
 
 ```bash
 docker run -d -p 6080:6080 \
+  --privileged \
+  --name abis-2025 \
   --platform linux/amd64 \
   -v /your/host/path:/home/brain/share \
-  --name abis-2025 \
   kytk/docker-abis-2025:latest
 ```
 
@@ -22,14 +23,15 @@ docker run -d -p 6080:6080 \
 
 ```bash
 docker run -d -p 6080:6080 \
+  --privileged \
+  --name abis-2025 \
   --platform linux/amd64 \
   -e RESOLUTION=1600x900x24 \
   -v /your/host/path:/home/brain/share \
-  --name abis-2025 \
   kytk/docker-abis-2025:latest
 ```
 
-指定しない場合、デフォルトの解像度は1920x1080x24です。
+指定しない場合、デフォルトの解像度は1600x900x24です。
 
 
 ## 注意
