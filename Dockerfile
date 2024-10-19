@@ -139,29 +139,29 @@ Pin-Priority: 1000\n\
     && rm -rf /var/lib/apt/lists/*
 
 ## Japanese environment
-RUN set -ex \
-    && apt-get update \
-    && apt-get install -y \
-       locales \
-       fcitx-mozc \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && locale-gen ja_JP.UTF-8 \
-    && mkdir -p /etc/skel/.config/autostart \
-    && echo '#!/bin/sh\nfcitx -d' > /etc/skel/.config/autostart/fcitx-autostart.sh \
-    && chmod +x /etc/skel/.config/autostart/fcitx-autostart.sh \
-    && echo "[Desktop Entry]\n\
-Type=Application\n\
-Name=fcitx\n\
-Exec=/etc/skel/.config/autostart/fcitx-autostart.sh\n\
-StartupNotify=false\n\
-Terminal=false\n\
-Hidden=false" > /etc/skel/.config/autostart/fcitx.desktop
-
-ENV LANG=ja_JP.UTF-8 \
-    GTK_IM_MODULE=fcitx \
-    QT_IM_MODULE=fcitx \
-    XMODIFIERS=@im=fcitx
+#RUN set -ex \
+#    && apt-get update \
+#    && apt-get install -y \
+#       locales \
+#       fcitx-mozc \
+#    && apt-get clean \
+#    && rm -rf /var/lib/apt/lists/* \
+#    && locale-gen ja_JP.UTF-8 \
+#    && mkdir -p /etc/skel/.config/autostart \
+#    && echo '#!/bin/sh\nfcitx -d' > /etc/skel/.config/autostart/fcitx-autostart.sh \
+#    && chmod +x /etc/skel/.config/autostart/fcitx-autostart.sh \
+#    && echo "[Desktop Entry]\n\
+#Type=Application\n\
+#Name=fcitx\n\
+#Exec=/etc/skel/.config/autostart/fcitx-autostart.sh\n\
+#StartupNotify=false\n\
+#Terminal=false\n\
+#Hidden=false" > /etc/skel/.config/autostart/fcitx.desktop
+#
+#ENV LANG=ja_JP.UTF-8 \
+#    GTK_IM_MODULE=fcitx \
+#    QT_IM_MODULE=fcitx \
+#    XMODIFIERS=@im=fcitx
 
 ## Install Google-chrome
 #RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
