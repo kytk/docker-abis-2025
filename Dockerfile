@@ -360,6 +360,13 @@ RUN set -ex \
     && rm freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     && mv freesurfer 7.4.1
 
+# Chris Rorden's tutorial
+RUN set -ex \
+    && cd /etc/skel/ \
+    && wget ${BASE_URL}/tutorial.zip \
+    && unzip tutorial.zip \
+    && rm tutorial.zip
+
 # fs-scripts and kn-scripts
 RUN set -ex \
     && cd /etc/skel/git \
@@ -369,6 +376,7 @@ RUN set -ex \
 # clean-up 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
+
 ########## End of Part 3 ##########
 
 ########## Part 4. VNC ##########
@@ -423,12 +431,6 @@ RUN mkdir ~/share
 RUN set -ex \
     && mkdir -p ~/freesurfer/7.4.1 \
     && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
-
-# Chris Rorden's tutorial
-RUN set -ex \
-    && wget ${BASE_URL}/tutorial.zip \
-    && unzip tutorial.zip \
-    && rm tutorial
 
 # Entrypoint
 COPY --chown=brain:brain docker-entrypoint.sh /usr/local/bin/
