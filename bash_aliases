@@ -5,6 +5,9 @@ alias open='xdg-open &> /dev/null'
 shopt -s direxpand
 shopt -s autocd
 
+#xset
+xset r rate
+
 # Mango
 export PATH=$PATH:/usr/local/Mango
 
