@@ -360,13 +360,6 @@ RUN set -ex \
     && rm freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     && mv freesurfer 7.4.1
 
-# Chris Rorden's tutorial
-RUN set -ex \
-    && cd /etc/skel/ \
-    && wget ${BASE_URL}/tutorial.zip \
-    && unzip tutorial.zip \
-    && rm tutorial.zip
-
 # fs-scripts and kn-scripts
 RUN set -ex \
     && cd /etc/skel/git \
@@ -424,13 +417,24 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Switch to the new user
 USER brain
 
-# prepare shared directory
-RUN mkdir ~/share
-
 # Prepare FreeSurfer
 RUN set -ex \
     && mkdir -p ~/freesurfer/7.4.1 \
     && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
+
+# Chris Rorden's tutorial
+RUN set -ex \
+    && cd /home/brain/ \
+    && wget ${BASE_URL}/tutorial.zip \
+    && unzip tutorial.zip \
+    && rm tutorial.zip \
+    && rm -rf __MACOSX
+
+# Uncheck "Show unsafe paste dialog"
+COPY terminalrc /home/brain/.config/xfce4/terminal/
+
+# prepare shared directory
+RUN mkdir ~/share
 
 # Entrypoint
 COPY --chown=brain:brain docker-entrypoint.sh /usr/local/bin/
