@@ -424,6 +424,12 @@ RUN set -ex \
     && mkdir -p ~/freesurfer/7.4.1 \
     && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
 
+# Chris Rorden's tutorial
+RUN set -ex \
+    && wget ${BASE_URL}/tutorial.zip \
+    && unzip tutorial.zip \
+    && rm tutorial
+
 # Entrypoint
 COPY --chown=brain:brain docker-entrypoint.sh /usr/local/bin/
 RUN chmod 755 /usr/local/bin/docker-entrypoint.sh
