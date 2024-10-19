@@ -112,6 +112,9 @@ RUN set -ex \
        fonts-noto \
        fonts-noto-cjk \
        fonts-noto-cjk-extra \
+       fonts-ipafont \
+       fonts-ipafont-gothic \
+       fonts-ipafont-mincho \
        pigz \
        gnumeric \
        appmenu-gtk-module-common \
