@@ -433,9 +433,6 @@ RUN set -ex \
 # Uncheck "Show unsafe paste dialog"
 COPY terminalrc /home/brain/.config/xfce4/terminal/
 
-# prepare shared directory
-RUN mkdir ~/share
-
 # Entrypoint
 COPY --chown=brain:brain docker-entrypoint.sh /usr/local/bin/
 RUN chmod 755 /usr/local/bin/docker-entrypoint.sh
