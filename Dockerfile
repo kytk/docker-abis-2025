@@ -54,7 +54,8 @@ RUN set -ex \
        python3-gpg \
        tzdata \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/*
 
 # Timezone
 RUN set -ex \
@@ -121,7 +122,8 @@ RUN set -ex \
        appmenu-gtk2-module \
        libappmenu-gtk2-parser0 \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/*
 
 # Firefox
 RUN set -ex \
@@ -136,7 +138,8 @@ Pin-Priority: 1000\n\
 ' | tee /etc/apt/preferences.d/mozilla \
     && apt-get update && sudo apt-get install -y firefox \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/*
 
 # Japanese environment
 RUN set -ex \
@@ -146,6 +149,7 @@ RUN set -ex \
        fcitx-mozc \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/* \
     && locale-gen ja_JP.UTF-8 
 #    && mkdir -p /etc/skel/.config/autostart \ 
 #    && echo '#!/bin/sh\nfcitx -d' > /etc/skel/.config/autostart/fcitx-autostart.sh \
@@ -168,6 +172,10 @@ ENV LANG=ja_JP.UTF-8 \
 # && apt install -y ./google-chrome-stable_current_amd64.deb \
 # && rm google-chrome-stable_current_amd64.deb
 
+# Remove unnecessary files
+RUN set -ex \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/* 
 ########## End of Part 1 ##########
 
 ########## Part 2. Lin4Neuro ##########
@@ -360,6 +368,7 @@ RUN set -ex \
       zlib1g \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/* \
     && wget ${BASE_URL}/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     # && wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     && tar -xvf freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
@@ -374,10 +383,7 @@ RUN set -ex \
 RUN set -ex \
     && cd /etc/skel/git \
     && git clone https://gitlab.com/kytk/fs-scripts.git \
-    && git clone https://gitlab.com/kytk/kn-scripts.git \
-    && mkdir /root/git \
-    && cd /root/ \
-    && ln -s /etc/skel/git .
+    && git clone https://gitlab.com/kytk/kn-scripts.git 
 
 # clean-up 
 RUN apt-get clean && \
