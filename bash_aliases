@@ -52,7 +52,7 @@ alias noddi='/usr/local/NODDI/run_NODDI.sh /usr/local/MATLAB/MCR/R2024b 2>/dev/n
 #FreeSurfer 7.4.1
 export SUBJECTS_DIR=~/freesurfer/7.4.1/subjects
 export FREESURFER_HOME=/usr/local/freesurfer/7.4.1
-export FS_LICENSE=/home/brain/share/license.txt
+export FS_LICENSE=~/share/license.txt
 source $FREESURFER_HOME/SetUpFreeSurfer.sh
 
 # FSL Setup
