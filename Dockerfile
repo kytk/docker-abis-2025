@@ -286,10 +286,7 @@ RUN set -ex \
     && wget ${BASE_URL}/tutorial.zip \
     && unzip tutorial.zip \
     && rm tutorial.zip \
-    && rm -rf __MACOSX \
-    && cp -r tutorial /root/ \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* 
+    && rm -rf __MACOSX 
 
 RUN set -ex \
     # Install MATLAB Runtime
@@ -379,10 +376,8 @@ RUN set -ex \
     && git clone https://gitlab.com/kytk/fs-scripts.git \
     && git clone https://gitlab.com/kytk/kn-scripts.git \
     && mkdir /root/git \
-    && cd /root/git \
-    && git clone https://gitlab.com/kytk/fs-scripts.git \
-    && git clone https://gitlab.com/kytk/kn-scripts.git 
-
+    && cd /root/ \
+    && ln -s /etc/skel/git .
 
 # clean-up 
 RUN apt-get clean && \
