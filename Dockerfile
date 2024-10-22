@@ -202,6 +202,7 @@ COPY xfce4-panel.xml xfce4-desktop.xml \
 
 # .bash_aliases
 COPY bash_aliases /etc/skel/.bash_aliases
+COPY bash_aliases /root/.bash_aliases
 
 ########## End of Part 2 ##########
 
@@ -279,6 +280,14 @@ RUN set -ex \
     && wget ${BASE_URL}/ANTs-jammy.zip \
     && unzip ANTs-jammy.zip \
     && rm ANTs-jammy.zip \
+    \
+    # Chris Rorden's tutorial
+    && cd /etc/skel \
+    && wget ${BASE_URL}/tutorial.zip \
+    && unzip tutorial.zip \
+    && rm tutorial.zip \
+    && rm -rf __MACOSX \
+    && cp -r tutorial /root/ \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* 
 
@@ -364,7 +373,12 @@ RUN set -ex \
 RUN set -ex \
     && cd /etc/skel/git \
     && git clone https://gitlab.com/kytk/fs-scripts.git \
+    && git clone https://gitlab.com/kytk/kn-scripts.git \
+    && mkdir /root/git \
+    && cd /root/git \
+    && git clone https://gitlab.com/kytk/fs-scripts.git \
     && git clone https://gitlab.com/kytk/kn-scripts.git 
+
 
 # clean-up 
 RUN apt-get clean && \
@@ -420,15 +434,8 @@ USER brain
 # Prepare FreeSurfer
 RUN set -ex \
     && mkdir -p ~/freesurfer/7.4.1 \
-    && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
-
-# Chris Rorden's tutorial
-RUN set -ex \
-    && cd /home/brain/ \
-    && wget ${BASE_URL}/tutorial.zip \
-    && unzip tutorial.zip \
-    && rm tutorial.zip \
-    && rm -rf __MACOSX
+    && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/ \
+    && ln -s /home/brain/freesurfer /root/
 
 # Uncheck "Show unsafe paste dialog"
 COPY terminalrc /home/brain/.config/xfce4/terminal/
