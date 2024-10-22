@@ -438,7 +438,7 @@ USER brain
 # Prepare FreeSurfer
 RUN set -ex \
     && mkdir -p ~/freesurfer/7.4.1 \
-    && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/ \
+    && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
 
 # Uncheck "Show unsafe paste dialog"
 COPY terminalrc /home/brain/.config/xfce4/terminal/
