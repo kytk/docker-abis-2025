@@ -5,13 +5,26 @@
 FROM ubuntu:22.04
 
 # Environmental variables
+# System configuration
 ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Asia/Tokyo \
-    RESOLUTION=1600x900x24 \
-    DISPLAY=:1 \
-    USER=brain \
-    parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts \
+    TZ=Asia/Tokyo
+
+# Display settings
+ENV RESOLUTION=1600x900x24 \
+    DISPLAY=:1
+
+# User settings
+ENV USER=brain
+
+# Path configuration
+ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts \
     BASE_URL="http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages"
+
+# Language and input method settings
+ENV LANG=ja_JP.UTF-8 \
+    GTK_IM_MODULE=fcitx \
+    QT_IM_MODULE=fcitx \
+    XMODIFIERS=@im=fcitx
 
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
@@ -55,7 +68,9 @@ RUN set -ex \
        tzdata \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* /var/tmp/*
+    && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/*
 
 # Timezone
 RUN set -ex \
@@ -123,7 +138,9 @@ RUN set -ex \
        libappmenu-gtk2-parser0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* /var/tmp/*
+    && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/*
 
 # Firefox
 RUN set -ex \
@@ -136,10 +153,13 @@ Package: *\n\
 Pin: origin packages.mozilla.org\n\
 Pin-Priority: 1000\n\
 ' | tee /etc/apt/preferences.d/mozilla \
-    && apt-get update && sudo apt-get install -y firefox \
+    && apt-get update \
+    && apt-get install -y firefox \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* /var/tmp/*
+    && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/*
 
 # Japanese environment
 RUN set -ex \
@@ -150,6 +170,8 @@ RUN set -ex \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/* \
     && locale-gen ja_JP.UTF-8 
 #    && mkdir -p /etc/skel/.config/autostart \ 
 #    && echo '#!/bin/sh\nfcitx -d' > /etc/skel/.config/autostart/fcitx-autostart.sh \
@@ -162,20 +184,11 @@ RUN set -ex \
 #Terminal=false\n\
 #Hidden=false" > /etc/skel/.config/autostart/fcitx.desktop
 
-ENV LANG=ja_JP.UTF-8 \
-    GTK_IM_MODULE=fcitx \
-    QT_IM_MODULE=fcitx \
-    XMODIFIERS=@im=fcitx
-
 ## Install Google-chrome
 #RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
 # && apt install -y ./google-chrome-stable_current_amd64.deb \
 # && rm google-chrome-stable_current_amd64.deb
 
-# Remove unnecessary files
-RUN set -ex \
-    && rm -rf /usr/share/doc/* \
-    && rm -rf /usr/share/man/* 
 ########## End of Part 1 ##########
 
 ########## Part 2. Lin4Neuro ##########
@@ -211,6 +224,8 @@ COPY xfce4-panel.xml xfce4-desktop.xml \
 # .bash_aliases
 COPY bash_aliases /etc/skel/.bash_aliases
 COPY bash_aliases /root/.bash_aliases
+RUN chmod 644 /root/.bash_aliases \
+    && chmod 644 /etc/skel/.bash_aliases
 
 ########## End of Part 2 ##########
 
@@ -218,83 +233,80 @@ COPY bash_aliases /root/.bash_aliases
 
 RUN set -ex \
     # Install DCMTK and set up Talairach Daemon
-    && apt-get update && apt-get install -y dcmtk \
+    && apt-get update \
+    && apt-get install -y dcmtk \
     && cp -r ${parts}/tdaemon /usr/local \
     \
     # Install and configure VirtualMRI
-    && cd /usr/local \
+    && cd /tmp/ \
     && wget ${BASE_URL}/vmri.zip \
-    && unzip vmri.zip \
+    && unzip vmri.zip -d /usr/local/ \
     && rm vmri.zip \
     \
     # Install and configure Mango
-    && cd /usr/local \
+    && cd /tmp/ \
     && wget ${BASE_URL}/mango_unix.zip \
-    && unzip mango_unix.zip \
+    && unzip mango_unix.zip -d /usr/local/ \
     && rm mango_unix.zip \
     \
     # Install and configure MRIcroGL
-    && cd /usr/local \
+    && cd /tmp/ \
     && wget ${BASE_URL}/MRIcroGL_linux.zip \
-    && unzip MRIcroGL_linux.zip \
+    && unzip MRIcroGL_linux.zip -d /usr/local/ \
     && rm MRIcroGL_linux.zip \
     \
     # Install and configure MRIcron
-    && cd /usr/local \
+    && cd /tmp/ \
     && wget ${BASE_URL}/MRIcron_linux.zip \
-    && unzip MRIcron_linux.zip \
+    && unzip MRIcron_linux.zip -d /usr/local/ \
     && rm MRIcron_linux.zip \
-    && cd mricron \
-    && find . -name 'dcm2niix' -exec rm {} \; \
-    && find . -name '*.bat' -exec rm {} \; \
-    && find . -type d -exec chmod 755 {} \; \
-    && find Resources -type f -exec chmod 644 {} \; \
+    && find /usr/local/mricron -name 'dcm2niix' -exec rm {} \; \
+    && find /usr/local/mricron -name '*.bat' -exec rm {} \; \
+    && find /usr/local/mricron -type d -exec chmod 755 {} \; \
+    && find /usr/local/mricron/Resources -type f -exec chmod 644 {} \; \
     && chmod 755 /usr/local/mricron/Resources/pigz_mricron \
     \
     # Install and configure Surf-Ice
-    && cd /usr/local \
+    && cd /tmp/ \
     && wget ${BASE_URL}/surfice_linux.zip \
-    && unzip surfice_linux.zip \
+    && unzip surfice_linux.zip -d /usr/local/ \
     && rm surfice_linux.zip \
-    && cd Surf_Ice \
-    && find . -type d -exec chmod 755 {} \; \
-    && find . -type f -exec chmod 644 {} \; \
-    && chmod 755 surfice* \
-    && chmod 644 surfice_Linux_Installation.txt \
+    && find /usr/local/Surf_Ice -type d -exec chmod 755 {} \; \
+    && find /usr/local/Surf_Ice -type f -exec chmod 644 {} \; \
+    && chmod 755 /usr/local/Surf_Ice/surfice* \
+    && chmod 644 /usr/local/Surf_Ice/surfice_Linux_Installation.txt \
     \
     # Install Octave and AlizaMS
     && apt-get install -y octave \
-    && mkdir -p /tmp/downloads \
-    && cd /tmp/downloads \
+    && cd /tmp/ \
     && wget ${BASE_URL}/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
-    && apt install -y /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
-    && rm  /tmp/downloads/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
+    && apt install -y ./alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
+    && rm alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
     && sed -i 's/NoDisplay=true/NoDisplay=false/' \
               /etc/skel/.local/share/applications/alizams.desktop \
     \
     # Install and configure dcm2niix
-    && cd /usr/local \
     && mkdir /usr/local/dcm2niix \
-    && cd /tmp/downloads \
+    && cd /tmp/ \
     && wget ${BASE_URL}/dcm2niix_lnx.zip \
-    && unzip /tmp/downloads/dcm2niix_lnx.zip -d /usr/local/dcm2niix \
-    && rm /tmp/downloads/dcm2niix_lnx.zip \
+    && unzip dcm2niix_lnx.zip -d /usr/local/dcm2niix \
+    && rm dcm2niix_lnx.zip \
     \
     # Install and configure MRtrix3 and ANTs
-    && cd /usr/local \
+    && cd /tmp/ \
     && wget ${BASE_URL}/mrtrix3_jammy.zip \
-    && unzip mrtrix3_jammy.zip \
+    && unzip mrtrix3_jammy.zip -d /usr/local \
     && rm mrtrix3_jammy.zip \
     && wget ${BASE_URL}/ANTs-jammy.zip \
-    && unzip ANTs-jammy.zip \
+    && unzip ANTs-jammy.zip -d /usr/local \
     && rm ANTs-jammy.zip \
     \
     # Chris Rorden's tutorial
-    && cd /etc/skel \
+    && cd /tmp/ \
     && wget ${BASE_URL}/tutorial.zip \
-    && unzip tutorial.zip \
+    && unzip tutorial.zip -d /etc/skel \
     && rm tutorial.zip \
-    && rm -rf __MACOSX 
+    && rm -rf /etc/skel/__MACOSX 
 
 RUN set -ex \
     # Install MATLAB Runtime
@@ -304,37 +316,37 @@ RUN set -ex \
     && unzip MATLAB_Runtime_R2024b_glnxa64.zip \
     && rm MATLAB_Runtime_R2024b_glnxa64.zip \
     && ./install -mode silent -agreeToLicense yes -destinationFolder /usr/local/MATLAB/MCR/ \
-    && cd /tmp && rm -rf mcr_r2024b \
+    && cd /tmp/ && rm -rf mcr_r2024b \
     \
     # Install and configure SPM12
-    && cd /usr/local \
+    && cd /tmp/ \
     && wget ${BASE_URL}/spm12_standalone_jammy_R2024b.zip \
-    && unzip spm12_standalone_jammy_R2024b.zip \
+    && unzip spm12_standalone_jammy_R2024b.zip -d /usr/local/ \
     && rm spm12_standalone_jammy_R2024b.zip \
-    && cd spm12_standalone \
-    && chmod 755 run_spm12.sh spm12 \
+    && chmod 755 /usr/local/spm12_standalone/run_spm12.sh \
+    && chmod 755 /usr/local/spm12_standalone/spm12 \
     \
     # Install and configure CONN
-    && cd /usr/local \
+    && cd /tmp/ \
     && wget ${BASE_URL}/conn22v2407_standalone_jammy_R2024b.zip \
-    && unzip conn22v2407_standalone_jammy_R2024b.zip \
+    && unzip conn22v2407_standalone_jammy_R2024b.zip -d /usr/local \
     && rm conn22v2407_standalone_jammy_R2024b.zip \
-    && cd conn22v2407_standalone \
-    && chmod 755 run_conn.sh conn \
+    && chmod 755 /usr/local/conn22v2407_standalone/run_conn.sh \
+    && chmod 755 /usr/local/conn22v2407_standalone/conn \
     \
     # Install and configure NODDI
-    && cd /usr/local \
+    && cd /tmp/ \
     && wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip \
-    && unzip NODDI_jammy_R2024b.zip \
+    && unzip NODDI_jammy_R2024b.zip -d /usr/local \
     && rm NODDI_jammy_R2024b.zip \
-    && cd NODDI \
-    && chmod 755 NODDI run_NODDI.sh
+    && chmod 755 /usr/local/NODDI/run_NODDI.sh \
+    && chmod 755 /usr/local/NODDI/NODDI 
 
 RUN set -ex \
     # Install and configure FSL
-    && cd /usr/local/ \
+    && cd /tmp/ \
     && wget ${BASE_URL}/fsl-6.0.7.14-jammy.tar.gz \
-    && tar -xvf fsl-6.0.7.14-jammy.tar.gz \
+    && tar -xvf fsl-6.0.7.14-jammy.tar.gz -C /usr/local/ \
     && rm fsl-6.0.7.14-jammy.tar.gz \
     && sed -i 's/NoDisplay=true/NoDisplay=false/' \
               /etc/skel/.local/share/applications/fsleyes.desktop
@@ -346,14 +358,12 @@ RUN set -ex \
 
 RUN set -ex \
     # Install FreeSurfer 7.4.1
-    && cd /usr/local \
-    && mkdir freesurfer && cd freesurfer \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
       binutils libx11-dev gettext x11-apps \
       perl make csh tcsh bash file bc gzip tar \
       xorg xorg-dev xserver-xorg-video-intel \
-      libncurses5 libbsd0 libc6 libc6 \
+      libncurses5 libbsd0 libc6 \
       libcom-err2 libcrypt1 libdrm2 libegl1 libexpat1 libffi7 \
       libfontconfig1 libfreetype6 libgcc-s1 libgl1 libglib2.0-0 \
       libglu1-mesa libglvnd0 libglx0 \
@@ -369,10 +379,16 @@ RUN set -ex \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/* \
+    && cd /tmp/ \
     && wget ${BASE_URL}/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     # && wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && mkdir /usr/local/freesurfer \
     && tar -xvf freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+       -C /usr/local/freesurfer \
     && rm freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && cd /usr/local/freesurfer/ \
     && mv freesurfer 7.4.1 \
     && mkdir -p /root/freesurfer/7.4.1 \
     && cp -rs /usr/local/freesurfer/7.4.1/subjects /root/freesurfer/7.4.1/ \
@@ -384,10 +400,6 @@ RUN set -ex \
     && cd /etc/skel/git \
     && git clone https://gitlab.com/kytk/fs-scripts.git \
     && git clone https://gitlab.com/kytk/kn-scripts.git 
-
-# clean-up 
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
 ########## End of Part 3 ##########
 
