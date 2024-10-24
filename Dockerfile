@@ -374,10 +374,10 @@ RUN set -ex \
     && tar -xvf freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     && rm freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
     && mv freesurfer 7.4.1 \
-    && cd /root \
-    && mkdir -p freesurfer/7.4.1 \
-    && cd /root/freesurfer/7.4.1 \
-    && ln -s /usr/local/freesurfer/7.4.1/subjects .
+    && mkdir -p /root/freesurfer/7.4.1 \
+    && cp -rs /usr/local/freesurfer/7.4.1/subjects /root/freesurfer/7.4.1/ \
+    && mkdir -p /etc/skel/freesurfer/7.4.1 \
+    && cp -rs /usr/local/freesurfer/7.4.1/subjects /etc/skel/freesurfer/7.4.1/
 
 # fs-scripts and kn-scripts
 RUN set -ex \
@@ -436,10 +436,10 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Switch to the new user
 USER brain
 
-# Prepare FreeSurfer
-RUN set -ex \
-    && mkdir -p ~/freesurfer/7.4.1 \
-    && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
+## Prepare FreeSurfer
+#RUN set -ex \
+#    && mkdir -p ~/freesurfer/7.4.1 \
+#    && cp -r /usr/local/freesurfer/7.4.1/subjects ~/freesurfer/7.4.1/
 
 # Uncheck "Show unsafe paste dialog"
 COPY terminalrc /home/brain/.config/xfce4/terminal/
