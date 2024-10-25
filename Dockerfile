@@ -20,12 +20,6 @@ ENV USER=brain
 ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts \
     BASE_URL="http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages"
 
-# Language and input method settings
-ENV LANG=ja_JP.UTF-8 \
-    GTK_IM_MODULE=fcitx \
-    QT_IM_MODULE=fcitx \
-    XMODIFIERS=@im=fcitx
-
 ########## Part 1. Base of Container ##########
 # Install basic utilities and X11
 RUN set -ex \
@@ -68,9 +62,7 @@ RUN set -ex \
        tzdata \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* /var/tmp/* \
-    && rm -rf /usr/share/doc/* \
-    && rm -rf /usr/share/man/*
+    && rm -rf /tmp/* /var/tmp/* 
 
 # Timezone
 RUN set -ex \
@@ -88,7 +80,7 @@ RUN set -ex \
 
 # Install utilities
 RUN set -ex \
-    &&  apt-get update \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
        less \
        iputils-ping \
@@ -138,9 +130,7 @@ RUN set -ex \
        libappmenu-gtk2-parser0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* /var/tmp/* \
-    && rm -rf /usr/share/doc/* \
-    && rm -rf /usr/share/man/*
+    && rm -rf /tmp/* /var/tmp/* 
 
 # Firefox
 RUN set -ex \
@@ -183,6 +173,12 @@ RUN set -ex \
 #StartupNotify=false\n\
 #Terminal=false\n\
 #Hidden=false" > /etc/skel/.config/autostart/fcitx.desktop
+
+# Language and input method settings
+ENV LANG=ja_JP.UTF-8 \
+    GTK_IM_MODULE=fcitx \
+    QT_IM_MODULE=fcitx \
+    XMODIFIERS=@im=fcitx
 
 ## Install Google-chrome
 #RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
