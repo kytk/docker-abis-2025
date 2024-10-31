@@ -156,31 +156,35 @@ RUN set -ex \
     && apt-get install -y \
        locales \
        fcitx5 \
-       fcitx5-anthy \
-       fonts-ipafont \
+       fcitx5-mozc \
        language-pack-ja \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* /var/tmp/* \
     && rm -rf /usr/share/doc/* \
     && rm -rf /usr/share/man/* \
-    && locale-gen ja_JP.UTF-8 \
-    && mkdir -p /etc/skel/.config/autostart \ 
-    && echo '#!/bin/sh\nfcitx5 -d' > /etc/skel/.config/autostart/fcitx5-autostart.sh \
-    && chmod +x /etc/skel/.config/autostart/fcitx5-autostart.sh \
-    && echo "[Desktop Entry]\n\
-Type=Application\n\
-Name=fcitx5\n\
-Exec=/etc/skel/.config/autostart/fcitx5-autostart.sh\n\
-StartupNotify=false\n\
-Terminal=false\n\
-Hidden=false" > /etc/skel/.config/autostart/fcitx5.desktop
+    && locale-gen ja_JP.UTF-8 
+#    && mkdir -p /etc/skel/.config/autostart \ 
+#    && echo '#!/bin/sh\nfcitx -d' > /etc/skel/.config/autostart/fcitx-autostart.sh \
+#    && chmod +x /etc/skel/.config/autostart/fcitx-autostart.sh \
+#    && echo "[Desktop Entry]\n\
+#Type=Application\n\
+#Name=fcitx\n\
+#Exec=/etc/skel/.config/autostart/fcitx-autostart.sh\n\
+#StartupNotify=false\n\
+#Terminal=false\n\
+#Hidden=false" > /etc/skel/.config/autostart/fcitx.desktop
 
 # Language and input method settings
 ENV LANG=ja_JP.UTF-8 \
     GTK_IM_MODULE=fcitx \
     QT_IM_MODULE=fcitx \
     XMODIFIERS=@im=fcitx
+
+## Install Google-chrome
+#RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+# && apt install -y ./google-chrome-stable_current_amd64.deb \
+# && rm google-chrome-stable_current_amd64.deb
 
 ########## End of Part 1 ##########
 
