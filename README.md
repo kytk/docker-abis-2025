@@ -1,37 +1,109 @@
 # Docker ABiS 2025
 
-## novnc版クイックスタート
+- ABiS脳MRIチュートリアルの環境をDockerコンテナで構築するプロジェクトです。
+- VNC版とnoVNC版があります。基本、VNC版を使いますが、noVNC版も開発はしています。
 
-Lin4Neuro環境を起動するには：
+## VNC版Lin4Neuro
 
-- 共有するためのディレクトリを作成し、そこにFreeSurferのライセンス、license.txt を保存したうえで、ターミナルから以下を実行してください
+### 事前準備
+
+- 共有するためのディレクトリを作成し、そこにFreeSurferのライセンス、license.txt を保存してください
+
+- Windowsの方はVNCクライアントを入手する必要があります。[RealVNC](https://www.realvnc.com/en/connect/download/viewer/)からWindows版をダウンロードし、インストールしてください
+
+### コンテナの起動
+- ターミナル/Powershellでそのディレクトリに移動します
 
 ```bash
-docker run -d -p 6080:6080 \
-  --privileged \
-  --name abis-2025 \
-  --platform linux/amd64 \
-  -v /your/host/path:/home/brain/share \
-  kytk/docker-abis-novnc:latest
+cd 共有するディレクトリのパス
 ```
 
-その後、Webブラウザで `http://localhost:6080/vnc.html` にアクセスすると、Lin4Neuroデスクトップ環境を使用できます。
-
-## カスタム解像度
-
-コンテナ起動時にカスタム解像度を指定できます：
+- そのうえで、以下のコマンドでコンテナを起動します
+から以下を実行してください
 
 ```bash
-docker run -d -p 6080:6080 \
-  --privileged \
-  --name abis-2025 \
+docker run \
+  --shm-size=4g \
   --platform linux/amd64 \
+  --name abis \
+  -d -p 5901:5901 \
+  -v .:/home/brain/share \
+  kytk/docker-abis-vnc:latest
+```
+
+### Lin4Neuroへのアクセス
+
+- macOSの方はファインダーから...
+- Windowsの方は、RealVNCを起動し、localhost:5901にアクセスします
+- パスワードは"lin4neuro"を入力してください
+
+### カスタム解像度
+
+- コンテナ起動時にカスタム解像度を指定できます：
+- 指定しない場合、デフォルトの解像度は1600x900x24です。
+
+```bash
+docker run \
+  --shm-size=4g \
+  --platform linux/amd64 \
+  --name abis \
   -e RESOLUTION=1600x900x24 \
-  -v /your/host/path:/home/brain/share \
+  -d -p 5901:5901 \
+  -v .:/home/brain/share \
+  kytk/docker-abis-vnc:latest
+```
+
+
+
+
+## noVNC版Lin4Neuro
+
+### 事前準備
+
+- 共有するためのディレクトリを作成し、そこにFreeSurferのライセンス、license.txt を保存してください
+
+### コンテナの起動
+- ターミナル/Powershellでそのディレクトリに移動します
+
+```bash
+cd 共有するディレクトリのパス
+```
+
+- そのうえで、以下のコマンドでコンテナを起動します
+から以下を実行してください
+
+```bash
+docker run \
+  --shm-size=4g \
+  --privileged \
+  --platform linux/amd64 \
+  --name abis \
+  -d -p 6080:6080 \
+  -v .:/home/brain/share \
   kytk/docker-abis-novnc:latest
 ```
 
-指定しない場合、デフォルトの解像度は1600x900x24です。
+### Lin4Neuroへのアクセス
+
+Webブラウザで `http://localhost:6080/vnc.html` にアクセスすると、Lin4Neuroデスクトップ環境を使用できます。
+
+### カスタム解像度
+
+- コンテナ起動時にカスタム解像度を指定できます：
+- 指定しない場合、デフォルトの解像度は1600x900x24です。
+
+```bash
+docker run \
+  --shm-size=4g \
+  --privileged \
+  --platform linux/amd64 \
+  --name abis \
+  -e RESOLUTION=1600x900x24 \
+  -d -p 6080:6080 \
+  -v .:/home/brain/share \
+  kytk/docker-abis-novnc:latest
+```
+
 
 
 ## 注意
