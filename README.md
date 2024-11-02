@@ -80,7 +80,7 @@ docker run \
   --name abis \
   -d -p 6080:6080 \
   -v .:/home/brain/share \
-  kytk/docker-abis-novnc:latest
+  kytk/abis-novnc:latest
 ```
 
 ### Lin4Neuroへのアクセス
@@ -101,7 +101,7 @@ docker run \
   -e RESOLUTION=1600x900x24 \
   -d -p 6080:6080 \
   -v .:/home/brain/share \
-  kytk/docker-abis-novnc:latest
+  kytk/abis-novnc:latest
 ```
 
 
