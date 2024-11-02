@@ -28,7 +28,7 @@ docker run \
   --name abis \
   -d -p 5901:5901 \
   -v .:/home/brain/share \
-  kytk/docker-abis-vnc:latest
+  kytk/abis-vnc:latest
 ```
 
 ### Lin4Neuroへのアクセス
@@ -50,7 +50,7 @@ docker run \
   -e RESOLUTION=1600x900x24 \
   -d -p 5901:5901 \
   -v .:/home/brain/share \
-  kytk/docker-abis-vnc:latest
+  kytk/abis-vnc:latest
 ```
 
 
