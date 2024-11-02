@@ -1,6 +1,6 @@
 # Docker ABiS 2025
 
-## クイックスタート
+## novnc版クイックスタート
 
 Lin4Neuro環境を起動するには：
 
@@ -12,7 +12,7 @@ docker run -d -p 6080:6080 \
   --name abis-2025 \
   --platform linux/amd64 \
   -v /your/host/path:/home/brain/share \
-  kytk/docker-abis-2025:latest
+  kytk/docker-abis-novnc:latest
 ```
 
 その後、Webブラウザで `http://localhost:6080/vnc.html` にアクセスすると、Lin4Neuroデスクトップ環境を使用できます。
@@ -28,7 +28,7 @@ docker run -d -p 6080:6080 \
   --platform linux/amd64 \
   -e RESOLUTION=1600x900x24 \
   -v /your/host/path:/home/brain/share \
-  kytk/docker-abis-2025:latest
+  kytk/docker-abis-novnc:latest
 ```
 
 指定しない場合、デフォルトの解像度は1600x900x24です。
