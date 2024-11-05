@@ -31,6 +31,20 @@ docker run \
   kytk/abis-vnc:latest
 ```
 
+- なお、デフォルトはキーボード配列が日本語になっています。キーボード配列がUSの方は以下のようにしてください
+
+```bash
+docker run \
+  --shm-size=4g \
+  --platform linux/amd64 \
+  --name abis \
+  -e KEYBOARD_LAYOUT=us \
+  -d -p 5901:5901 \
+  -v .:/home/brain/share \
+  kytk/abis-vnc:latest
+```
+
+
 ### Lin4Neuroへのアクセス
 
 - macOSの方はファインダーから...
