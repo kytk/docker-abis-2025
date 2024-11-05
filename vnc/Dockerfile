@@ -1,0 +1,502 @@
+# docker-abis-2025
+
+FROM ubuntu:22.04
+
+# Environmental variables
+# System configuration
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Asia/Tokyo
+
+# Display settings
+ENV DISPLAY=:1 \
+    RESOLUTION=1600x900
+
+# User settings
+ENV USER=brain
+
+# Path configuration
+ENV parts=/etc/skel/git/lin4neuro-jammy/lin4neuro-parts \
+    BASE_URL="http://www.lin4neuro.net/lin4neuro/neuroimaging_software_packages"
+
+########## Part 1. Base of Container ##########
+# Install basic utilities and X11
+RUN set -ex \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+       xfce4 \
+       xfce4-terminal \
+       xfce4-indicator-plugin  \
+       xfce4-statusnotifier-plugin  \
+       xfce4-screenshooter \
+       elementary-xfce-icon-theme \
+       gnome-icon-theme \
+       librsvg2-common \
+       gtk-update-icon-cache \
+       tango-icon-theme \
+       yaru-theme-icon \
+       shimmer-themes \
+       xinit \
+       build-essential  \
+       dkms \
+       thunar-archive-plugin \
+       file-roller \
+       gawk \
+       sed \
+       xdg-utils \
+       tigervnc-standalone-server \
+       tigervnc-common \
+       tigervnc-tools \
+       xfce4-session \
+       net-tools \
+       supervisor \
+       dbus-x11 \
+       x11-xkb-utils \
+       xkb-data \
+       libxkbcommon0 \
+       libxkbcommon-x11-0 \
+       xserver-xorg-core \
+       xserver-xorg-input-all \
+       libgl1-mesa-dri \
+       libgl1-mesa-glx \
+       libglu1-mesa \
+       x11-xserver-utils \
+       sudo \
+       python3-pip \
+       python3-venv \
+       python3-dev \
+       python3-tk \
+       python3-gpg \
+       tzdata \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/* 
+
+# Timezone
+RUN set -ex \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    && dpkg-reconfigure -f noninteractive tzdata
+
+# Python
+RUN set -ex \
+    && python3 -m pip install --upgrade pip \
+    && pip install --no-cache-dir numpy pandas pydicom gdcm dcm2bids \
+       heudiconv nipype nibabel jupyter notebook \
+       bash_kernel octave_kernel \
+    && python3 -m bash_kernel.install
+
+# Install utilities
+RUN set -ex \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+       less \
+       iputils-ping \
+       nano \
+       rsync \
+       locate \
+       git \
+       apt-utils \
+       at-spi2-core \
+       bc \
+       curl \
+       wget \
+       dc \
+       default-jre \
+       evince \
+       gedit \
+       gnome-system-monitor \
+       gnome-system-tools \
+       imagemagick \
+       rename \
+       ntp \
+       tree \
+       unzip \
+       vim  \
+       zip \
+       tcsh \
+       baobab \
+       libopenblas-base \
+       apturl \
+       dmz-cursor-theme \
+       p7zip-full \
+       gnupg \
+       eog \
+       meld \
+       libjpeg62 \
+       software-properties-common \
+       fonts-noto \
+       fonts-noto-cjk \
+       fonts-noto-cjk-extra \
+       fonts-ipafont \
+       fonts-ipafont-gothic \
+       fonts-ipafont-mincho \
+       pigz \
+       gnumeric \
+       appmenu-gtk-module-common \
+       appmenu-gtk2-module \
+       libappmenu-gtk2-parser0 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/* 
+
+# Firefox
+RUN set -ex \
+    && install -d -m 0755 /etc/apt/keyrings \
+    && wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- |\
+       tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null \
+    && echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null \
+    && echo '\n\
+Package: *\n\
+Pin: origin packages.mozilla.org\n\
+Pin-Priority: 1000\n\
+' | tee /etc/apt/preferences.d/mozilla \
+    && apt-get update \
+    && apt-get install -y firefox \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/*
+
+# Japanese environment
+RUN set -ex \
+    && apt-get update \
+    && apt-get install -y \
+       locales \
+       fcitx \
+       fcitx-anthy \
+       fcitx-config-gtk \
+       fcitx-frontend-gtk2 \
+       fcitx-frontend-gtk3 \
+       fcitx-frontend-qt5 \
+       fcitx-ui-classic \
+       language-pack-ja \
+       im-config \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/* \
+    && locale-gen ja_JP.UTF-8 \
+    && mkdir -p /etc/skel/.config/fcitx \
+    && echo '[Profile]\nIMName=anthy\nEnableIM=True' > \
+       /etc/skel/.config/fcitx/profile \
+    && mkdir -p /etc/skel/.config/autostart \ 
+    && echo '#!/bin/sh\nfcitx -d' > /etc/skel/.config/autostart/fcitx-autostart.sh \
+    && chmod +x /etc/skel/.config/autostart/fcitx-autostart.sh \
+    && echo "[Desktop Entry]\n\
+Type=Application\n\
+Name=fcitx\n\
+Exec=/etc/skel/.config/autostart/fcitx-autostart.sh\n\
+StartupNotify=false\n\
+Terminal=false\n\
+Hidden=false" > /etc/skel/.config/autostart/fcitx.desktop
+
+# Language and input method settings
+ENV LANG=ja_JP.UTF-8 \
+    GTK_IM_MODULE=fcitx \
+    QT_IM_MODULE=fcitx \
+    XMODIFIERS=@im=fcitx
+
+## Install Google-chrome
+#RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+# && apt install -y ./google-chrome-stable_current_amd64.deb \
+# && rm google-chrome-stable_current_amd64.deb
+
+########## End of Part 1 ##########
+
+########## Part 2. Lin4Neuro ##########
+RUN set -ex \
+    && mkdir /etc/skel/git && cd /etc/skel/git \
+    && git clone https://gitlab.com/kytk/lin4neuro-jammy.git \
+     \
+    # Icons and Applications
+    && mkdir -p /etc/skel/.local/share \ 
+    && cp -r ${parts}/local/share/icons /etc/skel/.local/share/ \
+    && cp -r ${parts}/local/share/applications /etc/skel/.local/share/ \
+     \
+    # Customized menu
+    && mkdir -p /etc/skel/.config/menus \
+    && cp ${parts}/config/menus/xfce-applications.menu /etc/skel/.config/menus \
+     \
+    # Customized panel, desktop, and theme
+    && cp -r ${parts}/config/xfce4 /etc/skel/.config/ \
+    && cp /usr/share/applications/firefox.desktop \
+          /etc/skel/.config/xfce4/panel/launcher-6/ \
+    && rm /etc/skel/.config/xfce4/panel/launcher-6/google-chrome.desktop \
+    && rm /etc/skel/.config/xfce4/panel/launcher-6/firefox.desktop \
+     \
+    # Desktop files
+    && cp -r ${parts}/local/share/applications /etc/skel/.local/share/ \
+     \
+    # Neuroimaging.directory
+    && mkdir -p /etc/skel/.local/share/desktop-directories \
+    && cp ${parts}/local/share/desktop-directories/Neuroimaging.directory \
+       /etc/skel/.local/share/desktop-directories \
+     \
+    # Background image and remove an unnecessary image file
+    && cp ${parts}/backgrounds/deep_ocean.png /usr/share/backgrounds \
+    && rm /usr/share/backgrounds/xfce/xfce-*.*p*g
+
+COPY xfce4-panel.xml xfce4-desktop.xml \
+     /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml
+
+# .bash_aliases
+COPY bash_aliases /etc/skel/.bash_aliases
+COPY bash_aliases /root/.bash_aliases
+RUN chmod 644 /root/.bash_aliases \
+    && chmod 644 /etc/skel/.bash_aliases
+
+# fs-scripts and kn-scripts
+RUN set -ex \
+    && cd /etc/skel/git \
+    && git clone https://gitlab.com/kytk/fs-scripts.git \
+    && git clone https://gitlab.com/kytk/kn-scripts.git 
+
+# Create user and configure directories
+RUN set -ex \
+    && useradd -m -s /bin/bash brain \
+    && echo "brain:lin4neuro" | chpasswd \
+    && adduser brain sudo \
+    && mkdir -p /home/brain/logs \
+    && chown -R brain:brain /home/brain/logs \
+    && chmod 755 /home/brain/logs \
+    && mkdir -p /home/brain/.cache \
+    && chown -R brain:brain /home/brain/.cache
+
+########## End of Part 2 ##########
+
+##### Part 3. Neuroimaging and related Software packages #####
+
+RUN set -ex \
+    # Install DCMTK and set up Talairach Daemon
+    && apt-get update \
+    && apt-get install -y dcmtk \
+    && cp -r ${parts}/tdaemon /usr/local \
+    \
+    # Install and configure VirtualMRI
+    && cd /tmp/ \
+    && wget ${BASE_URL}/vmri.zip \
+    && unzip vmri.zip -d /usr/local/ \
+    && rm vmri.zip \
+    \
+    # Install and configure Mango
+    && cd /tmp/ \
+    && wget ${BASE_URL}/mango_unix.zip \
+    && unzip mango_unix.zip -d /usr/local/ \
+    && rm mango_unix.zip \
+    \
+    # Install and configure MRIcroGL
+    && cd /tmp/ \
+    && wget ${BASE_URL}/MRIcroGL_linux.zip \
+    && unzip MRIcroGL_linux.zip -d /usr/local/ \
+    && rm MRIcroGL_linux.zip \
+    \
+    # Install and configure MRIcron
+    && cd /tmp/ \
+    && wget ${BASE_URL}/MRIcron_linux.zip \
+    && unzip MRIcron_linux.zip -d /usr/local/ \
+    && rm MRIcron_linux.zip \
+    && find /usr/local/mricron -name 'dcm2niix' -exec rm {} \; \
+    && find /usr/local/mricron -name '*.bat' -exec rm {} \; \
+    && find /usr/local/mricron -type d -exec chmod 755 {} \; \
+    && find /usr/local/mricron/Resources -type f -exec chmod 644 {} \; \
+    && chmod 755 /usr/local/mricron/Resources/pigz_mricron \
+    \
+    # Install and configure Surf-Ice
+    && cd /tmp/ \
+    && wget ${BASE_URL}/surfice_linux.zip \
+    && unzip surfice_linux.zip -d /usr/local/ \
+    && rm surfice_linux.zip \
+    && find /usr/local/Surf_Ice -type d -exec chmod 755 {} \; \
+    && find /usr/local/Surf_Ice -type f -exec chmod 644 {} \; \
+    && chmod 755 /usr/local/Surf_Ice/surfice* \
+    && chmod 644 /usr/local/Surf_Ice/surfice_Linux_Installation.txt \
+    \
+    # Install Octave and AlizaMS
+    && apt-get install -y octave \
+    && cd /tmp/ \
+    && wget ${BASE_URL}/alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
+    && apt install -y ./alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
+    && rm alizams_1.9.10+git0.95d7909-1+1.1_amd64.deb \
+    && sed -i 's/NoDisplay=true/NoDisplay=false/' \
+              /etc/skel/.local/share/applications/alizams.desktop \
+    \
+    # Install and configure dcm2niix
+    && mkdir /usr/local/dcm2niix \
+    && cd /tmp/ \
+    && wget ${BASE_URL}/dcm2niix_lnx.zip \
+    && unzip dcm2niix_lnx.zip -d /usr/local/dcm2niix \
+    && rm dcm2niix_lnx.zip \
+    \
+    # Install and configure MRtrix3 and ANTs
+    && cd /tmp/ \
+    && wget ${BASE_URL}/mrtrix3_jammy.zip \
+    && unzip mrtrix3_jammy.zip -d /usr/local \
+    && rm mrtrix3_jammy.zip \
+    && wget ${BASE_URL}/ANTs-jammy.zip \
+    && unzip ANTs-jammy.zip -d /usr/local \
+    && rm ANTs-jammy.zip \
+    \
+    # Chris Rorden's tutorial
+    && cd /tmp/ \
+    && wget ${BASE_URL}/tutorial.zip \
+    && unzip tutorial.zip -d /etc/skel \
+    && rm tutorial.zip \
+    && rm -rf /etc/skel/__MACOSX
+
+RUN set -ex \
+    # Install MATLAB Runtime
+    && cd /tmp/ \
+    && mkdir mcr_r2024b && cd mcr_r2024b \
+    && wget ${BASE_URL}/MATLAB_Runtime_R2024b_glnxa64.zip \
+    && unzip MATLAB_Runtime_R2024b_glnxa64.zip \
+    && rm MATLAB_Runtime_R2024b_glnxa64.zip \
+    && ./install -mode silent -agreeToLicense yes -destinationFolder /usr/local/MATLAB/MCR/ \
+    && cd /tmp/ && rm -rf mcr_r2024b \
+    \
+    # Install and configure SPM12
+    && cd /tmp/ \
+    && wget ${BASE_URL}/spm12_standalone_jammy_R2024b.zip \
+    && unzip spm12_standalone_jammy_R2024b.zip -d /usr/local/ \
+    && rm spm12_standalone_jammy_R2024b.zip \
+    && chmod 755 /usr/local/spm12_standalone/run_spm12.sh \
+    && chmod 755 /usr/local/spm12_standalone/spm12 \
+    \
+    # Install and configure CONN
+    && cd /tmp/ \
+    && wget ${BASE_URL}/conn22v2407_standalone_jammy_R2024b.zip \
+    && unzip conn22v2407_standalone_jammy_R2024b.zip -d /usr/local \
+    && rm conn22v2407_standalone_jammy_R2024b.zip \
+    && chmod 755 /usr/local/conn22v2407_standalone/run_conn.sh \
+    && chmod 755 /usr/local/conn22v2407_standalone/conn \
+    \
+    # Install and configure NODDI
+    && cd /tmp/ \
+    && wget https://www.nemotos.net/l4n-abis/NODDI_jammy_R2024b.zip \
+    && unzip NODDI_jammy_R2024b.zip -d /usr/local \
+    && rm NODDI_jammy_R2024b.zip \
+    && chmod 755 /usr/local/NODDI/run_NODDI.sh \
+    && chmod 755 /usr/local/NODDI/NODDI 
+
+# SPM, CONN, and NODDI settings
+RUN set -ex \
+    && chown -R brain:brain /usr/local/spm12_standalone \
+    && cd /usr/local/spm12_standalone \
+    && chmod 755 run_spm12.sh spm12 \
+    # CONN settings
+    && chown -R brain:brain /usr/local/conn22v2407_standalone \
+    && cd /usr/local/conn22v2407_standalone \
+    && chmod 755 run_conn.sh conn \
+    # NODDI settings
+    && chown -R brain:brain /usr/local/NODDI \
+    && cd /usr/local/NODDI \
+    && chmod 755 run_NODDI.sh NODDI
+
+# Install and configure FSL
+RUN set -ex \
+    && cd /tmp/ \
+    && wget ${BASE_URL}/fsl-6.0.7.15-jammy.tar.gz \
+    && tar -xvf fsl-6.0.7.15-jammy.tar.gz -C /usr/local/ \
+    && rm fsl-6.0.7.15-jammy.tar.gz \
+    && sed -i 's/NoDisplay=true/NoDisplay=false/' \
+              /etc/skel/.local/share/applications/fsleyes.desktop
+
+# FSL original script
+# RUN cd /tmp \
+#    && wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py \
+#    && /usr/bin/python3 fslinstaller.py -d /usr/local/fsl
+
+# Install and configure FreeSurfer 7.4.1
+RUN set -ex \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+      binutils libx11-dev gettext x11-apps \
+      perl make csh tcsh bash file bc gzip tar \
+      xorg xorg-dev xserver-xorg-video-intel \
+      libncurses5 libbsd0 libc6 \
+      libcom-err2 libcrypt1 libdrm2 libegl1 libexpat1 libffi7 \
+      libfontconfig1 libfreetype6 libgcc-s1 libgl1 libglib2.0-0 \
+      libglu1-mesa libglvnd0 libglx0 \
+      libgomp1 libgssapi-krb5-2 libice6 libjpeg62 libk5crypto3 libkeyutils1 \
+      libkrb5-3 libkrb5support0 libpcre3 libpng16-16 libquadmath0 libsm6 \
+      libstdc++6 libuuid1 libwayland-client0 libwayland-cursor0 libx11-6 \
+      libx11-xcb1 libxau6 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+      libxcb-randr0 libxcb-render-util0 libxcb-render0 libxcb-shape0 \
+      libxcb-shm0 libxcb-sync1 libxcb-util1 libxcb-xfixes0 libxcb-xinerama0 \
+      libxcb-xinput0 libxcb-xkb1 libxcb1 libxdmcp6 libxext6 libxft2 libxi6 \
+      libxkbcommon-x11-0 libxkbcommon0 libxmu6 libxrender1 libxss1 libxt6 \
+      zlib1g \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/* \
+    && cd /tmp/ \
+    && wget ${BASE_URL}/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    # && wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && mkdir /usr/local/freesurfer \
+    && tar -xvf freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+       -C /usr/local/freesurfer \
+    && rm freesurfer-linux-ubuntu22_amd64-7.4.1.tar.gz \
+    && cd /usr/local/freesurfer/ \
+    && mv freesurfer 7.4.1 \
+    && mkdir -p /root/freesurfer/7.4.1 \
+    && cp -rs /usr/local/freesurfer/7.4.1/subjects /root/freesurfer/7.4.1/ \
+    && mkdir -p /home/brain/freesurfer/7.4.1 \
+    && chown -R brain:brain /home/brain/freesurfer \
+    && cp -rs /usr/local/freesurfer/7.4.1/subjects \
+              /home/brain/freesurfer/7.4.1/ 
+
+########## End of Part 3 ##########
+
+######### Part 4. VNC ##########
+USER root
+RUN set -ex \
+    # Set up VNC directories
+    && mkdir -p /root/.vnc \
+    && mkdir -p /home/brain/.vnc \
+    && mkdir -p /run/user/1000 \
+    && mkdir -p /run/dbus \
+    && chmod 700 /run/user/1000 \
+    && chmod 755 /run/dbus \
+    && chown brain:brain /run/user/1000 \
+    && chown -R brain:brain /home/brain/.vnc \
+    && chown -R brain:brain /run/dbus \
+    # Setup xfce session
+    && mkdir -p /usr/share/xsessions \
+    && echo "[Desktop Entry]\n\
+Version=1.0\n\
+Type=XSession\n\
+Exec=startxfce4\n\
+TryExec=startxfce4\n\
+Name=Xfce Session" > /usr/share/xsessions/xfce.desktop \
+    # Setup supervisor
+    && mkdir -p /etc/supervisor/conf.d \
+    && chown -R brain:brain /etc/supervisor/conf.d
+
+# Copy supervisor configuration
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf.template
+RUN chown brain:brain /etc/supervisor/conf.d/supervisord.conf.template
+
+# Expose VNC port
+EXPOSE 5901
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+  CMD nc -z localhost 5901 || exit 1
+
+# Set up environment variables
+ENV XDG_RUNTIME_DIR=/run/user/1000
+
+# Switch to the new user
+USER brain
+
+# Configure input method for the user
+RUN im-config -n fcitx --keep-default
+
+# Entrypoint
+COPY --chown=brain:brain docker-entrypoint.sh /usr/local/bin/
+RUN chmod 755 /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
