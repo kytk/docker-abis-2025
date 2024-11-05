@@ -155,25 +155,25 @@ RUN set -ex \
     && apt-get update \
     && apt-get install -y \
        locales \
-       fcitx5 \
-       fcitx5-mozc \
+       fcitx \
+       fcitx-anthy \
        language-pack-ja \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* /var/tmp/* \
     && rm -rf /usr/share/doc/* \
     && rm -rf /usr/share/man/* \
-    && locale-gen ja_JP.UTF-8 
-#    && mkdir -p /etc/skel/.config/autostart \ 
-#    && echo '#!/bin/sh\nfcitx -d' > /etc/skel/.config/autostart/fcitx-autostart.sh \
-#    && chmod +x /etc/skel/.config/autostart/fcitx-autostart.sh \
-#    && echo "[Desktop Entry]\n\
-#Type=Application\n\
-#Name=fcitx\n\
-#Exec=/etc/skel/.config/autostart/fcitx-autostart.sh\n\
-#StartupNotify=false\n\
-#Terminal=false\n\
-#Hidden=false" > /etc/skel/.config/autostart/fcitx.desktop
+    && locale-gen ja_JP.UTF-8 \
+    && mkdir -p /etc/skel/.config/autostart \ 
+    && echo '#!/bin/sh\nfcitx -d' > /etc/skel/.config/autostart/fcitx-autostart.sh \
+    && chmod +x /etc/skel/.config/autostart/fcitx-autostart.sh \
+    && echo "[Desktop Entry]\n\
+Type=Application\n\
+Name=fcitx\n\
+Exec=/etc/skel/.config/autostart/fcitx-autostart.sh\n\
+StartupNotify=false\n\
+Terminal=false\n\
+Hidden=false" > /etc/skel/.config/autostart/fcitx.desktop
 
 # Language and input method settings
 ENV LANG=ja_JP.UTF-8 \
@@ -342,9 +342,9 @@ RUN set -ex \
 RUN set -ex \
     # Install and configure FSL
     && cd /tmp/ \
-    && wget ${BASE_URL}/fsl-6.0.7.14-jammy.tar.gz \
-    && tar -xvf fsl-6.0.7.14-jammy.tar.gz -C /usr/local/ \
-    && rm fsl-6.0.7.14-jammy.tar.gz \
+    && wget ${BASE_URL}/fsl-6.0.7.15-jammy.tar.gz \
+    && tar -xvf fsl-6.0.7.15-jammy.tar.gz -C /usr/local/ \
+    && rm fsl-6.0.7.15-jammy.tar.gz \
     && sed -i 's/NoDisplay=true/NoDisplay=false/' \
               /etc/skel/.local/share/applications/fsleyes.desktop
 
