@@ -349,9 +349,9 @@ RUN set -ex \
     # Install MATLAB Runtime
     && cd /tmp/ \
     && mkdir mcr_r2024b && cd mcr_r2024b \
-    && wget ${BASE_URL}/MATLAB_Runtime_R2024b_glnxa64.zip \
-    && unzip MATLAB_Runtime_R2024b_glnxa64.zip \
-    && rm MATLAB_Runtime_R2024b_glnxa64.zip \
+    && wget ${BASE_URL}/MATLAB_Runtime_R2024b_Update_1_glnxa64.zip \
+    && unzip MATLAB_Runtime_R2024b_Update_1_glnxa64.zip \
+    && rm MATLAB_Runtime_R2024b_Update_1_glnxa64.zip \
     && ./install -mode silent -agreeToLicense yes -destinationFolder /usr/local/MATLAB/MCR/ \
     && cd /tmp/ && rm -rf mcr_r2024b \
     \
