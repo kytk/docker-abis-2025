@@ -131,13 +131,22 @@ RUN set -ex \
        fonts-ipafont-gothic \
        fonts-ipafont-mincho \
        pigz \
-       gnumeric \
        appmenu-gtk-module-common \
        appmenu-gtk2-module \
        libappmenu-gtk2-parser0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* /var/tmp/* 
+
+# Libreoffice calc and writer
+RUN set -ex \
+    && apt-get update \
+    && apt-get install -y \
+       libreoffice-calc \
+       libreoffice-writer \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* /var/tmp/*
 
 # Firefox
 RUN set -ex \
